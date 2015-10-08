@@ -1,0 +1,24 @@
+{
+  "name": "accelerate",
+  "version": "1.0.0",
+  "description": "Accelerate back and forth through time for your database or other in-place systems",
+  "author": "Caleb Meredith",
+  "license": "MIT",
+  "homepage": "https://github.com/calebmer/accelerate#readme",
+  "keywords": [
+    "database",
+    "migrate",
+    "sql"
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calebmer/accelerate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/calebmer/accelerate/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
