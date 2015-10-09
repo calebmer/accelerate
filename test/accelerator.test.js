@@ -1,7 +1,7 @@
 'use strict'
 
 let Assert = require('assert')
-let Accelerate = require('../lib/accelerate')
+let Accelerator = require('../lib/accelerator')
 
 let value = null
 let status = null
@@ -38,7 +38,7 @@ let values = [
   'HEllU WURlD'
 ]
 
-let accelerate = new Accelerate(driver, motions)
+let accelerator = new Accelerator(driver, motions)
 
 function testHelper(steps) {
   return () => steps.reduce(
@@ -54,7 +54,7 @@ function testHelper(steps) {
   )
 }
 
-describe('Accelerate', () => {
+describe('Accelerator', () => {
   afterEach(() => {
     value = null
     status = null
@@ -62,92 +62,92 @@ describe('Accelerate', () => {
 
   describe('move(n)', () => {
     it('will move up', testHelper([
-      () => accelerate.move(+1), 1
+      () => accelerator.move(+1), 1
     ]))
 
     it('will move down', testHelper([
-      () => accelerate.move(+1), 1,
-      () => accelerate.move(-1), 0
+      () => accelerator.move(+1), 1,
+      () => accelerator.move(-1), 0
     ]))
 
     it('will move n times', testHelper([
-      () => accelerate.move(+3), 3,
-      () => accelerate.move(-2), 1,
-      () => accelerate.move(+4), 5,
-      () => accelerate.move(-3), 2
+      () => accelerator.move(+3), 3,
+      () => accelerator.move(-2), 1,
+      () => accelerator.move(+4), 5,
+      () => accelerator.move(-3), 2
     ]))
 
     it('will only execute in bounds', testHelper([
-      () => accelerate.move(-50), 0,
-      () => accelerate.move(+50), 5,
-      () => accelerate.move(+50), 5,
-      () => accelerate.move(-1), 4,
-      () => accelerate.move(-50), 0
+      () => accelerator.move(-50), 0,
+      () => accelerator.move(+50), 5,
+      () => accelerator.move(+50), 5,
+      () => accelerator.move(-1), 4,
+      () => accelerator.move(-50), 0
     ]))
   })
 
   describe('goto(n)', () => {
     it('will go to n upwards', testHelper([
-      () => accelerate.goto(3), 4,
-      () => accelerate.goto(4), 5
+      () => accelerator.goto(3), 4,
+      () => accelerator.goto(4), 5
     ]))
 
     it('will go to n downwards', testHelper([
-      () => accelerate.goto(4), 5,
-      () => accelerate.goto(2), 3,
-      () => accelerate.goto(1), 2
+      () => accelerator.goto(4), 5,
+      () => accelerator.goto(2), 3,
+      () => accelerator.goto(1), 2
     ]))
 
     it('will go to the upstate', testHelper([
-      () => accelerate.goto(4), 5,
-      () => accelerate.goto(0), 1
+      () => accelerator.goto(4), 5,
+      () => accelerator.goto(0), 1
     ]))
 
     it('will only execute in bounds', testHelper([
-      () => accelerate.goto(+50), 5,
-      () => accelerate.move(-1), 4,
-      () => accelerate.goto(-50), 0,
-      () => accelerate.move(+1), 1
+      () => accelerator.goto(+50), 5,
+      () => accelerator.move(-1), 4,
+      () => accelerator.goto(-50), 0,
+      () => accelerator.move(+1), 1
     ]))
   })
 
   describe('up()', () => {
-    it('will run all motions upwards', testHelper([() => accelerate.up(), 5]))
+    it('will run all motions upwards', testHelper([() => accelerator.up(), 5]))
 
     it('will work at any status', testHelper([
-      () => accelerate.move(+3), 3,
-      () => accelerate.up(), 5
+      () => accelerator.move(+3), 3,
+      () => accelerator.up(), 5
     ]))
   })
 
   describe('down()', () => {
     it('will run all motions downwards', testHelper([
-      () => accelerate.up(), 5,
-      () => accelerate.down(), 0
+      () => accelerator.up(), 5,
+      () => accelerator.down(), 0
     ]))
 
     it('will work at any status', testHelper([
-      () => accelerate.move(+3), 3,
-      () => accelerate.down(), 0
+      () => accelerator.move(+3), 3,
+      () => accelerator.down(), 0
     ]))
   })
 
   describe('redo()', () => {
     it('will go one down than one up', testHelper([
-      () => accelerate.redo(), 1,
-      () => accelerate.redo(), 1,
-      () => accelerate.move(+3), 4,
-      () => accelerate.redo(), 4
+      () => accelerator.redo(), 1,
+      () => accelerator.redo(), 1,
+      () => accelerator.move(+3), 4,
+      () => accelerator.redo(), 4
     ]))
   })
 
   describe('reset()', () => {
     it('will go down and up to the previous status', testHelper([
-      () => accelerate.reset(), 0,
-      () => accelerate.up(), 5,
-      () => accelerate.reset(), 5,
-      () => accelerate.move(-2)//, 3,
-      // () => accelerate.reset(), 3
+      () => accelerator.reset(), 0,
+      () => accelerator.up(), 5,
+      () => accelerator.reset(), 5,
+      () => accelerator.move(-2), 3,
+      () => accelerator.reset(), 3
     ]))
   })
 })
