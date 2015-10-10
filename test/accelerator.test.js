@@ -111,6 +111,39 @@ describe('Accelerator', () => {
     ]))
   })
 
+  describe('add()', () => {
+    it('will add one', testHelper([
+      () => accelerator.add(), 1,
+      () => accelerator.move(-1), 0,
+      () => accelerator.add(), 1,
+      () => accelerator.add(), 2,
+      () => accelerator.move(+2), 4,
+      () => accelerator.add(), 5
+    ]))
+  })
+
+  describe('sub()', () => {
+    it('will subtract one', testHelper([
+      () => accelerator.sub(), 0,
+      () => accelerator.move(+50), 5,
+      () => accelerator.sub(), 4,
+      () => accelerator.move(+1), 5,
+      () => accelerator.sub(), 4,
+      () => accelerator.sub(), 3,
+      () => accelerator.move(-2), 1,
+      () => accelerator.sub(), 0
+    ]))
+  })
+
+  describe('redo()', () => {
+    it('will go one down than one up', testHelper([
+      () => accelerator.redo(), 1,
+      () => accelerator.redo(), 1,
+      () => accelerator.move(+3), 4,
+      () => accelerator.redo(), 4
+    ]))
+  })
+
   describe('up()', () => {
     it('will run all motions upwards', testHelper([() => accelerator.up(), 5]))
 
@@ -129,15 +162,6 @@ describe('Accelerator', () => {
     it('will work at any status', testHelper([
       () => accelerator.move(+3), 3,
       () => accelerator.down(), 0
-    ]))
-  })
-
-  describe('redo()', () => {
-    it('will go one down than one up', testHelper([
-      () => accelerator.redo(), 1,
-      () => accelerator.redo(), 1,
-      () => accelerator.move(+3), 4,
-      () => accelerator.redo(), 4
     ]))
   })
 
