@@ -13,20 +13,20 @@ let driver = {
 }
 
 let motions = [{
-  up:   () => 'hello',
-  down: () => null
+  add: () => 'hello',
+  sub: () => null
 }, {
-  up:   v => `${v} world`,
-  down: v => v.slice(0, -6)
+  add: v => `${v} world`,
+  sub: v => v.slice(0, -6)
 }, {
-  up:   v => v.replace(/o/g, 'u'),
-  down: v => v.replace(/u/g, 'o')
+  add: v => v.replace(/o/g, 'u'),
+  sub: v => v.replace(/u/g, 'o')
 }, {
-  up:   v => v.toUpperCase(),
-  down: v => v.toLowerCase()
+  add: v => v.toUpperCase(),
+  sub: v => v.toLowerCase()
 }, {
-  up:   v => v.replace(/L/g, 'l'),
-  down: v => v.replace(/l/g, 'L')
+  add: v => v.replace(/L/g, 'l'),
+  sub: v => v.replace(/l/g, 'L')
 }]
 
 let values = [
