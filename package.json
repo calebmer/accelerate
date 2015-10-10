@@ -19,7 +19,7 @@
     "url": "https://github.com/calebmer/accelerate/issues"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "test": "node_modules/.bin/mocha test/*.test.js"
   },
   "devDependencies": {
     "mocha": "^2.3.3"
