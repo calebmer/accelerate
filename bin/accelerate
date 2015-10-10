@@ -16,7 +16,7 @@ Program.version(pkg.version)
 
 Program
 .option('-t, --target [url]', 'the targeted url to accelerate')
-.option('-d, --directory [path]', 'the directory holding the motions')
+.option('-d, --directory [path]', 'the directory holding the motions', '.')
 
 Program
 .command('ls')
