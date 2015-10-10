@@ -32,7 +32,7 @@ Your template file is your blueprint for future motions. The text inside these f
 Following is how to name your template file:
 
 ```
-[version pattern][one or more of ‘-’, ‘_’, ‘~’, or ‘ ‘]template.[‘add’ or ‘sub’][extension (optional)]
+[version]-template.(add|sub)[extension]
 ```
 
 Wow, that’s really confusing. Well that’s because it’s super configurable! I’m not going to make you name your templates in any certain way, you be you.
