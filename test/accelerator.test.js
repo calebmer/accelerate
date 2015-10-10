@@ -60,6 +60,8 @@ describe('Accelerator', () => {
     status = null
   })
 
+  it('gracefully handles errors')
+
   describe('move(n)', () => {
     it('will move up', testHelper([
       () => accelerator.move(+1), 1
