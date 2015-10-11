@@ -5,6 +5,7 @@
   "author": "Caleb Meredith",
   "license": "MIT",
   "homepage": "https://github.com/calebmer/accelerate#readme",
+  "repository": "calebmer/accelerate",
   "keywords": [
     "database",
     "migrate",
@@ -14,10 +15,6 @@
   "preferGlobal": true,
   "bin": {
     "accelerate": "bin/accelerate"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/calebmer/accelerate.git"
   },
   "bugs": {
     "url": "https://github.com/calebmer/accelerate/issues"
