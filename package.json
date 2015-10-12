@@ -1,6 +1,6 @@
 {
   "name": "accelerate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Accelerate back and forth through time for your database or other in-place systems",
   "author": "Caleb Meredith",
   "license": "MIT",
