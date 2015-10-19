@@ -96,7 +96,7 @@ Want a naming flavor you can’t have with the current system, you know what [to
     add [n]        add n motions (default n=1)
     sub [n]        subtract n motions (default n=1)
     goto <n>       go to the nth motion
-    redo           subtract than add the last motion
+    redo           subtract then add the last motion
     up             add all remaining motions
     down           subtract all previous motions
     reset          subtract then add all previous motions
