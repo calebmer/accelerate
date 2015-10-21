@@ -1,4 +1,9 @@
+mod accelerator;
 mod drivers;
+
+use accelerator::Accelerator;
+use drivers::Driver;
+use drivers::TestDriver;
 
 fn main() {
     println!("Hello, world!");
