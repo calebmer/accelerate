@@ -1,4 +1,5 @@
 pub mod accelerator;
+pub mod motions;
 pub mod drivers;
 #[cfg(test)]
 mod tests;

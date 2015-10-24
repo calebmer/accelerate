@@ -1,4 +1,5 @@
 use drivers::Driver;
+use motions::Motion;
 
 pub struct Accelerator<D: Driver> {
     motions: Vec<Motion>,
@@ -99,9 +100,4 @@ impl Operation{
         if finish < start { return Operation::Sub(-1) }
         Operation::Add(1)
     }
-}
-
-pub struct Motion{
-    pub add: &'static str,
-    pub sub: &'static str,
 }

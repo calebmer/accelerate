@@ -1,5 +1,6 @@
 use drivers::Driver;
-use accelerator::*;
+use motions::Motion;
+use accelerator::Accelerator;
 
 struct TestDriver{
     target: &'static str,
