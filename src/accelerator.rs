@@ -11,8 +11,8 @@ impl <D: Driver> Accelerator<D> {
     pub fn new(mots: Vec<Motion>, drv: D) -> Self {
         Accelerator{motions: mots, driver: drv}
     }
-    // Needs to be un pub.ed
-    pub fn within_bounds(&self, n: isize) -> isize{
+
+    fn within_bounds(&self, n: isize) -> isize{
         let min = 0;
         let max = self.motions.len() as isize;
         if n < min { return min }
@@ -50,7 +50,7 @@ impl <D: Driver> Accelerator<D> {
     pub fn go(&mut self, n: isize){
         let start = self.driver.get_status();
         let finish = self.within_bounds(start + n);
-        self.execute(start,finish);
+        self.execute(start, finish);
     }
 
     pub fn goto(&mut self, finish: isize){
