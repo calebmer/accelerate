@@ -1,11 +1,11 @@
 #![cfg(feature = "driver-postgres")]
-use drivers::Driver as Driv;
+use drivers::Driver as DriverTrait;
 
 pub struct Driver{
     target: &'static str,
 }
 
-impl Driv for Driver {
+impl DriverTrait for Driver {
     fn new(target: &'static str) -> Self {
         Driver { target: target }
     }

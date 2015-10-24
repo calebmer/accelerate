@@ -31,4 +31,4 @@ impl Driver for TestDriver {
 }
 
 #[cfg(feature = "driver-postgres")]
-pub mod driver_postgres;
+pub mod postgres;
