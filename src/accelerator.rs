@@ -84,6 +84,11 @@ impl <D: Driver> Accelerator<D> {
         self.execute(0,status);
     }
 
+    pub fn get_status(&self) -> isize{
+        return self.driver.get_status();
+    }
+}
+
 pub enum Operation{
     Add(isize),
     Sub(isize)
