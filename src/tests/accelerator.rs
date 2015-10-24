@@ -29,10 +29,10 @@ impl Driver for TestDriver {
 
 fn get_accelerator() -> Accelerator<TestDriver>{
     return Accelerator::new(vec![Motion{add: "add 1", sub:"sub 1"},
-                                        Motion{add: "add 2", sub:"sub 2"},
-                                        Motion{add: "add 3", sub:"sub 3"},
-                                        Motion{add: "add 4", sub:"sub 4"}],
-                     TestDriver::new("Test Driver!"));
+                                Motion{add: "add 2", sub:"sub 2"},
+                                Motion{add: "add 3", sub:"sub 3"},
+                                Motion{add: "add 4", sub:"sub 4"}],
+                            TestDriver::new("Test Driver"));
 }
 
 #[test]
@@ -88,31 +88,38 @@ fn redo() {
 }
 
 #[test]
-fn add2_redo() {
+fn shift2_redo() {
     let mut acc = get_accelerator();
-    acc.add();
-    acc.add();
+    acc.shift(2);
     acc.redo();
     assert_eq!(2, acc.get_status());
 }
+
 #[test]
-fn go() {
+fn shift() {
     let mut acc = get_accelerator();
-    acc.go(0);
+    acc.shift(0);
     assert_eq!(0, acc.get_status());
 }
 
 #[test]
-fn go_2() {
+fn shift_n4() {
     let mut acc = get_accelerator();
-    acc.go(2);
-    assert_eq!(2, acc.get_status());
+    acc.shift(-4);
+    assert_eq!(0, acc.get_status());
 }
 
 #[test]
-fn go_8() {
+fn shift_3() {
     let mut acc = get_accelerator();
-    acc.go(8);
+    acc.shift(3);
+    assert_eq!(3, acc.get_status());
+}
+
+#[test]
+fn shift_8() {
+    let mut acc = get_accelerator();
+    acc.shift(8);
     assert_eq!(4, acc.get_status());
 }
 

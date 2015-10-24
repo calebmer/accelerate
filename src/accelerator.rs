@@ -46,7 +46,7 @@ impl <D: Driver> Accelerator<D> {
             }
         }
     }
-    pub fn go(&mut self, n: isize){
+    pub fn shift(&mut self, n: isize){
         let start = self.driver.get_status();
         let finish = self.within_bounds(start + n);
         self.execute(start, finish);
@@ -57,17 +57,9 @@ impl <D: Driver> Accelerator<D> {
         self.execute(status, finish);
     }
 
-    pub fn add(&mut self){
-        self.go(1);
-    }
-
-    pub fn sub(&mut self){
-        self.go(-1);
-    }
-
     pub fn redo(&mut self){
-        self.sub();
-        self.add();
+        self.shift(-1);
+        self.shift(1);
     }
 
     pub fn up(&mut self){
