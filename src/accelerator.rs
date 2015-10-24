@@ -1,6 +1,4 @@
 use drivers::Driver;
-use Motion;
-use Operation;
 
 pub struct Accelerator<D: Driver> {
     motions: Vec<Motion>,
@@ -85,4 +83,20 @@ impl <D: Driver> Accelerator<D> {
         self.execute(status,0);
         self.execute(0,status);
     }
+
+pub enum Operation{
+    Add(isize),
+    Sub(isize)
+}
+
+impl Operation{
+    fn get(finish: isize, start: isize) -> Self{
+        if finish < start { return Operation::Sub(-1) }
+        Operation::Add(1)
+    }
+}
+
+pub struct Motion{
+    pub add: &'static str,
+    pub sub: &'static str,
 }
