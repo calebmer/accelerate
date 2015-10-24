@@ -50,32 +50,18 @@ fn down() {
 }
 
 #[test]
+fn down_up() {
+    let mut acc = get_accelerator();
+    acc.down();
+    acc.up();
+    assert_eq!(4, acc.get_status());
+}
+
+#[test]
 fn up_down() {
     let mut acc = get_accelerator();
     acc.up();
     acc.down();
-    assert_eq!(0, acc.get_status());
-}
-
-#[test]
-fn add() {
-    let mut acc = get_accelerator();
-    acc.add();
-    assert_eq!(1, acc.get_status());
-}
-
-#[test]
-fn sub() {
-    let mut acc = get_accelerator();
-    acc.sub();
-    assert_eq!(0, acc.get_status());
-}
-
-#[test]
-fn add_sub() {
-    let mut acc = get_accelerator();
-    acc.add();
-    acc.sub();
     assert_eq!(0, acc.get_status());
 }
 
@@ -131,6 +117,13 @@ fn goto() {
 }
 
 #[test]
+fn goto_n5() {
+    let mut acc = get_accelerator();
+    acc.goto(-5);
+    assert_eq!(0, acc.get_status());
+}
+
+#[test]
 fn goto_8() {
     let mut acc = get_accelerator();
     acc.goto(8);
@@ -153,13 +146,6 @@ fn goto_6_n1() {
 }
 
 #[test]
-fn reset() {
-    let mut acc = get_accelerator();
-    acc.reset();
-    assert_eq!(0, acc.get_status());
-}
-
-#[test]
 fn goto_2_reset() {
     let mut acc = get_accelerator();
     acc.goto(2);
@@ -173,4 +159,11 @@ fn goto_8_reset() {
     acc.goto(8);
     acc.reset();
     assert_eq!(4, acc.get_status());
+}
+
+#[test]
+fn reset() {
+    let mut acc = get_accelerator();
+    acc.reset();
+    assert_eq!(0, acc.get_status());
 }
