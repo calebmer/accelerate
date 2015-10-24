@@ -17,13 +17,15 @@ impl Driver for TestDriver {
         return self.status
     }
 
-    fn set_status(&mut self, status: isize){
+    fn set_status(&mut self, status: isize)-> &mut Self{
         println!("Set Status to \'{}\'", status);
         self.status = status;
+        self
     }
 
-    fn execute(&self, motion: &'static str){
+    fn execute(&self, motion: &'static str)-> &Self{
         println!("I am a {1} that says \'{0}\'", motion, self.target);
+        self
     }
 }
 

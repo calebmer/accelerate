@@ -15,11 +15,13 @@ impl DriverTrait for Driver {
         return 0
     }
 
-    fn set_status(&mut self, status: isize){
+    fn set_status(&mut self, status: isize) -> &mut Self{
         println!("Set Status to \'{}\'", status);
+        self
     }
 
-    fn execute(&self, motion: &'static str){
+    fn execute(&self, motion: &'static str)-> &Self{
         println!("I am a thing that says \'{0}\' with {1}", motion, self.target);
+        self
     }
 }

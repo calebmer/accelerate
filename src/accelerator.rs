@@ -19,7 +19,7 @@ impl <D: Driver> Accelerator<D> {
         n
     }
 
-    fn execute(&mut self, mut start: isize, mut finish: isize){
+    fn execute(&mut self, mut start: isize, mut finish: isize) -> &mut Self{
         if start != finish {
             start = self.within_bounds(start);
             finish = self.within_bounds(finish);
@@ -45,36 +45,43 @@ impl <D: Driver> Accelerator<D> {
                 }
             }
         }
+        self
     }
-    pub fn shift(&mut self, n: isize){
+    pub fn shift(&mut self, n: isize) -> &mut Self{
         let start = self.driver.get_status();
         let finish = self.within_bounds(start + n);
         self.execute(start, finish);
+        self
     }
 
-    pub fn goto(&mut self, finish: isize){
+    pub fn goto(&mut self, finish: isize) -> &mut Self{
         let status = self.driver.get_status();
         self.execute(status, finish);
+        self
     }
 
-    pub fn redo(&mut self){
+    pub fn redo(&mut self) -> &mut Self{
         self.shift(-1);
         self.shift(1);
+        self
     }
 
-    pub fn up(&mut self){
+    pub fn up(&mut self) -> &mut Self{
         let last = self.motions.len() as isize;
         self.goto(last);
+        self
     }
 
-    pub fn down(&mut self){
+    pub fn down(&mut self) -> &mut Self{
         self.goto(0);
+        self
     }
 
-    pub fn reset(&mut self){
+    pub fn reset(&mut self) -> &mut Self{
         let status = self.driver.get_status();
         self.execute(status,0);
         self.execute(0,status);
+        self
     }
 
     pub fn get_status(&self) -> isize{
