@@ -18,7 +18,7 @@ driver-postgres = ["postgres"]
 # driver-mongodb  = ["mongodb"]                Comming Soon(tm)
 none            = []
 [dependencies]
-clap     = "1.4.5"
+clap     = "1.4.6"
 regex    = "0.1.41"
 postgres = {version = "0.10", optional = true }
 # mysql    = {version = "0.20.1", optional = true }
