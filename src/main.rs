@@ -53,13 +53,12 @@ fn main() {
     let directory = matches.value_of("directory").unwrap_or(".");
 }
 
-fn ls(directory: &String) {
+fn ls(directory: String) {
     let mots = motions::get(directory);
     for mot in mots{
         println!("{}", mot.name);
     }
 }
 
-fn redo() {
-
-}
+// TODO Implement
+fn create(directory: String, name: String){}
