@@ -1,9 +1,7 @@
 use drivers::Driver;
 use motions::Motion;
 
-fn within_bounds(motions: &Vec<Motion>, n: isize) -> isize{
-    let min = 0;
-    let max = motions.len() as isize;
+fn clamp(n: isize, min: isize, max: isize) -> isize{
     if n < min { return min }
     if n > max { return max }
     n
@@ -11,8 +9,8 @@ fn within_bounds(motions: &Vec<Motion>, n: isize) -> isize{
 
 fn execute<D: Driver>(driver: &mut D, motions: &Vec<Motion>, mut start: isize, mut finish: isize) {
     if start != finish {
-        start = within_bounds(motions, start);
-        finish = within_bounds(motions, finish);
+        start = clamp(start, 0, motions.len() as isize);
+        finish = clamp(finish, 0, motions.len() as isize);
         let operation = Operation::get(finish, start);
         match operation{
             Operation::Add(op) => {
@@ -39,7 +37,7 @@ fn execute<D: Driver>(driver: &mut D, motions: &Vec<Motion>, mut start: isize, m
 
 pub fn shift<D: Driver>(driver: &mut D, motions: &Vec<Motion>, n: isize) {
     let start = driver.get_status();
-    let finish = within_bounds(motions, start + n);
+    let finish = clamp(start + n, 0, motions.len() as isize);
     execute(driver, motions, start, finish);
 }
 
