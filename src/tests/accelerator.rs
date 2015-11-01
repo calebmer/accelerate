@@ -1,6 +1,6 @@
 use drivers::Driver;
 use motions::Motion;
-use accelerator::Accelerator;
+use accelerator;
 
 struct TestDriver{
     target: String,
@@ -9,163 +9,167 @@ struct TestDriver{
 
 impl Driver for TestDriver {
     fn new(target: String) -> Self {
+        println!("Creating a new TestDriver with target: {}", target);
         TestDriver { target: target, status: 0 }
     }
 
     fn get_status(&self) -> isize{
-        println!("Get Status of {0}, which is \'{1}\'", self.target, self.status);
+        println!("The Status of {0}\n\t is {1}", self.target, self.status);
         return self.status
     }
 
     fn set_status(&mut self, status: isize)-> &mut Self{
-        println!("Set Status to \'{}\'", status);
+        println!("Set Status of {0}\n\t from {1}\n\t to {2}", self.target, self.status, status);
         self.status = status;
         self
     }
 
-    fn execute(&self, motion: &'static str)-> &Self{
-        println!("I am a {1} that says \'{0}\'", motion, self.target);
+    fn execute(&self, motion: &String)-> &Self{
+        println!("I am a {0}\n\t that says {1}\n\t while at {2}", self.target, motion, self.status);
         self
     }
 }
 
-fn get_accelerator() -> Accelerator<TestDriver>{
-    return Accelerator::new(vec![Motion{add: "add 1", sub:"sub 1"},
-                                Motion{add: "add 2", sub:"sub 2"},
-                                Motion{add: "add 3", sub:"sub 3"},
-                                Motion{add: "add 4", sub:"sub 4"}],
-                            TestDriver::new("Test Driver"));
+fn get_motions() -> Vec<Motion>{
+    return vec![Motion::get("add 1".to_string(), "sub 1".to_string()),
+                Motion::get("add 2".to_string(), "sub 2".to_string()),
+                Motion::get("add 3".to_string(), "sub 3".to_string()),
+                Motion::get("add 4".to_string(), "sub 4".to_string())];
+}
+
+fn get_driver() -> TestDriver{
+    TestDriver::new("Test Driver".to_string())
 }
 
 #[test]
 fn up() {
-    let mut acc = get_accelerator();
-    acc.up();
-    assert_eq!(4, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::up(&mut drv, &get_motions());
+    assert_eq!(4, drv.get_status());
 }
 
 #[test]
 fn down() {
-    let mut acc = get_accelerator();
-    acc.down();
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::down(&mut drv, &get_motions());
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn down_up() {
-    let mut acc = get_accelerator();
-    acc.down();
-    acc.up();
-    assert_eq!(4, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::down(&mut drv, &get_motions());
+    accelerator::up(&mut drv, &get_motions());
+    assert_eq!(4, drv.get_status());
 }
 
 #[test]
 fn up_down() {
-    let mut acc = get_accelerator();
-    acc.up();
-    acc.down();
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::up(&mut drv, &get_motions());
+    accelerator::down(&mut drv, &get_motions());
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn redo() {
-    let mut acc = get_accelerator();
-    acc.redo();
+    let mut drv = get_driver();
+    accelerator::redo(&mut drv, &get_motions());
     // sub at 0 will do nothing and then add thus the status should be 1
-    assert_eq!(1, acc.get_status());
+    assert_eq!(1, drv.get_status());
 }
 
 #[test]
 fn shift2_redo() {
-    let mut acc = get_accelerator();
-    acc.shift(2);
-    acc.redo();
-    assert_eq!(2, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::shift(&mut drv, &get_motions(), 2);
+    accelerator::redo(&mut drv, &get_motions());
+    assert_eq!(2, drv.get_status());
 }
 
 #[test]
 fn shift() {
-    let mut acc = get_accelerator();
-    acc.shift(0);
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::shift(&mut drv, &get_motions(), 0);
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn shift_n4() {
-    let mut acc = get_accelerator();
-    acc.shift(-4);
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::shift(&mut drv, &get_motions(), -4);
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn shift_3() {
-    let mut acc = get_accelerator();
-    acc.shift(3);
-    assert_eq!(3, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::shift(&mut drv, &get_motions(), 3);
+    assert_eq!(3, drv.get_status());
 }
 
 #[test]
 fn shift_8() {
-    let mut acc = get_accelerator();
-    acc.shift(8);
-    assert_eq!(4, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::shift(&mut drv, &get_motions(), 8);
+    assert_eq!(4, drv.get_status());
 }
 
 #[test]
 fn goto() {
-    let mut acc = get_accelerator();
-    acc.goto(0);
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 0);
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn goto_n5() {
-    let mut acc = get_accelerator();
-    acc.goto(-5);
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), -5);
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn goto_8() {
-    let mut acc = get_accelerator();
-    acc.goto(8);
-    assert_eq!(4, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 8);
+    assert_eq!(4, drv.get_status());
 }
 
 #[test]
 fn goto_3() {
-    let mut acc = get_accelerator();
-    acc.goto(3);
-    assert_eq!(3, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 3);
+    assert_eq!(3, drv.get_status());
 }
 
 #[test]
 fn goto_6_n1() {
-    let mut acc = get_accelerator();
-    acc.goto(6);
-    acc.goto(-1);
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 6);
+    accelerator::goto(&mut drv, &get_motions(), -1);
+    assert_eq!(0, drv.get_status());
 }
 
 #[test]
 fn goto_2_reset() {
-    let mut acc = get_accelerator();
-    acc.goto(2);
-    acc.reset();
-    assert_eq!(2, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 2);
+    accelerator::reset(&mut drv, &get_motions());
+    assert_eq!(2, drv.get_status());
 }
 
 #[test]
 fn goto_8_reset() {
-    let mut acc = get_accelerator();
-    acc.goto(8);
-    acc.reset();
-    assert_eq!(4, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::goto(&mut drv, &get_motions(), 8);
+    accelerator::reset(&mut drv, &get_motions());
+    assert_eq!(4, drv.get_status());
 }
 
 #[test]
 fn reset() {
-    let mut acc = get_accelerator();
-    acc.reset();
-    assert_eq!(0, acc.get_status());
+    let mut drv = get_driver();
+    accelerator::reset(&mut drv, &get_motions());
+    assert_eq!(0, drv.get_status());
 }
