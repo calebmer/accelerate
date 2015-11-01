@@ -1,44 +1,16 @@
-use drivers::Driver;
+use drivers::{Driver, DefaultDriver};
 use motions::Motion;
 use accelerator;
 
-struct TestDriver{
-    target: String,
-    status: isize,
-}
-
-impl Driver for TestDriver {
-    fn new(target: String) -> Self {
-        println!("Creating a new TestDriver with target: {}", target);
-        TestDriver { target: target, status: 0 }
-    }
-
-    fn get_status(&self) -> isize{
-        println!("The Status of {0}\n\t is {1}", self.target, self.status);
-        return self.status
-    }
-
-    fn set_status(&mut self, status: isize)-> &mut Self{
-        println!("Set Status of {0}\n\t from {1}\n\t to {2}", self.target, self.status, status);
-        self.status = status;
-        self
-    }
-
-    fn execute(&self, motion: &String)-> &Self{
-        println!("I am a {0}\n\t that says {1}\n\t while at {2}", self.target, motion, self.status);
-        self
-    }
-}
-
-fn get_motions() -> Vec<Motion>{
+fn get_motions() -> Vec<Motion> {
     return vec![Motion::get("add 1".to_string(), "sub 1".to_string()),
                 Motion::get("add 2".to_string(), "sub 2".to_string()),
                 Motion::get("add 3".to_string(), "sub 3".to_string()),
                 Motion::get("add 4".to_string(), "sub 4".to_string())];
 }
 
-fn get_driver() -> TestDriver{
-    TestDriver::new("Test Driver".to_string())
+fn get_driver() -> DefaultDriver {
+    return DefaultDriver::new("Test Driver".to_string());
 }
 
 #[test]
