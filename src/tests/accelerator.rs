@@ -3,12 +3,12 @@ use motions::Motion;
 use accelerator::Accelerator;
 
 struct TestDriver{
-    target: &'static str,
+    target: String,
     status: isize,
 }
 
 impl Driver for TestDriver {
-    fn new(target: &'static str) -> Self {
+    fn new(target: String) -> Self {
         TestDriver { target: target, status: 0 }
     }
 

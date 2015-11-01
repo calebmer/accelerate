@@ -2,11 +2,11 @@
 use drivers::Driver as DriverTrait;
 
 pub struct Driver{
-    target: &'static str,
+    target: String,
 }
 
 impl DriverTrait for Driver {
-    fn new(target: &'static str) -> Self {
+    fn new(target: String) -> Self {
         Driver { target: target }
     }
 
