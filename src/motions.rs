@@ -16,6 +16,7 @@ impl Motion {
     }
 }
 
-pub fn get(directory: &String) -> Vec<Motion>{
+// TODO implement
+pub fn get(directory: String) -> Vec<Motion>{
     return vec![Motion::get("add 1".to_string(), "sub 1".to_string())];
 }
