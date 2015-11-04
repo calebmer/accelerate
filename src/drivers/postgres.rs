@@ -1,25 +1,25 @@
 #![cfg(feature = "driver-postgres")]
 use drivers::Driver as DriverTrait;
 
-pub struct Driver{
+pub struct Driver {
     target: String,
 }
 
-//TODO Implement
+// TODO Implement
 impl DriverTrait for Driver {
     fn new(target: String) -> Self {
         Driver { target: target }
     }
 
-    fn get_status(&self) -> isize{
-        return 0
+    fn get_status(&self) -> isize {
+        return 0;
     }
 
-    fn set_status(&mut self, status: isize) -> &mut Self{
+    fn set_status(&mut self, status: isize) -> &mut Self {
         self
     }
 
-    fn execute(&self, motion: &String)-> &Self{
+    fn execute(&self, motion: &String) -> &Self {
         self
     }
 }

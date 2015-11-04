@@ -1,9 +1,13 @@
 use drivers::Driver;
 use motions::Motion;
 
-fn clamp(n: isize, min: isize, max: isize) -> isize{
-    if n < min { return min }
-    if n > max { return max }
+fn clamp(n: isize, min: isize, max: isize) -> isize {
+    if n < min {
+        return min;
+    }
+    if n > max {
+        return max;
+    }
     n
 }
 
@@ -12,20 +16,24 @@ fn execute<D: Driver>(driver: &mut D, motions: &Vec<Motion>, mut start: isize, m
         start = clamp(start, 0, motions.len() as isize);
         finish = clamp(finish, 0, motions.len() as isize);
         let operation = Operation::get(finish, start);
-        match operation{
+        match operation {
             Operation::Add(op) => {
                 let mut i = start;
-                loop{
-                    if i == finish { break }
+                loop {
+                    if i == finish {
+                        break;
+                    }
                     driver.execute(&motions[i as usize].add);
                     i += op;
                 }
                 driver.set_status(i);
-            },
+            }
             Operation::Sub(op) => {
                 let mut i = start;
-                loop{
-                    if i == finish { break }
+                loop {
+                    if i == finish {
+                        break;
+                    }
                     i += op;
                     driver.execute(&motions[i as usize].sub);
                 }
@@ -66,14 +74,16 @@ pub fn reset<D: Driver>(driver: &mut D, motions: &Vec<Motion>) {
     execute(driver, motions, 0, status);
 }
 
-pub enum Operation{
+pub enum Operation {
     Add(isize),
-    Sub(isize)
+    Sub(isize),
 }
 
 impl Operation{
-    fn get(finish: isize, start: isize) -> Self{
-        if finish < start { return Operation::Sub(-1) }
+    fn get(finish: isize, start: isize) -> Self {
+        if finish < start {
+            return Operation::Sub(-1);
+        }
         Operation::Add(1)
     }
 }
