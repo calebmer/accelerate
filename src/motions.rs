@@ -18,7 +18,21 @@ impl Motion {
     }
 }
 
+use std::fs;
 // TODO implement
 pub fn get(directory: String) -> Vec<Motion> {
-    return vec![Motion::get("add 1".to_string(), "sub 1".to_string())];
+  let paths = fs::read_dir(directory.clone());
+  match paths {
+    Ok(paths) => {
+      for path in paths {
+          // TODO add Motion::get that takes the file
+          //println!("Name: {}", path);
+      }
+    },
+    Err(e) => {
+      panic!("Directory {0} did not exist!\n  Error: {1}", directory, e);
+    }
+  }
+  // TODO Replace this
+  return vec![Motion::get("add 1".to_string(), "sub 1".to_string())];
 }
