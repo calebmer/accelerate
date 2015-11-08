@@ -105,15 +105,15 @@ Want a naming flavor you can’t have with the current system, you know what [to
 
     -h, --help              output usage information
     -V, --version           output the version number
-    -t, --target [url]      the targeted url to accelerate
+    -t, --target [URL]      the targeted URL to accelerate
     -d, --directory [path]  the directory holding the motions
 
 
 ```
 
-Look at all those sweet sweet commands, gives me goosebumps.
+Look at all those sweet sweet commands, gives me goose bumps.
 
-There description hopefully makes them self explanatory, just remeber to always include the target parameter (directory is `.` by default). The target parameter will be your url (see supported drivers above for examples).
+There description hopefully makes them self explanatory, just remember to always include the target parameter (directory is `.` by default). The target parameter will be your URL (see supported drivers above for examples).
 
 ## Twitter
 If you like `accelerate` FOLLOW ME ON TWITTER, I’m [@calebmer](https://twitter.com/@calebmer). See you there 👍
