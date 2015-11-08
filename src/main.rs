@@ -6,7 +6,7 @@ pub mod drivers;
 mod tests;
 
 extern crate clap;
-use clap::{App, Arg, SubCommand, ArgMatches};
+use clap::{App, Arg, SubCommand};
 
 use drivers::Driver;
 
