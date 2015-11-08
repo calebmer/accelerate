@@ -22,17 +22,14 @@ use std::fs;
 // TODO implement
 pub fn get(directory: String) -> Vec<Motion> {
     let motions: Vec<Motion> = Vec::new();
-    let files = if let Ok(fs) = fs::read_dir(directory.clone()) {
-        fs
+    if let Ok(files) = fs::read_dir(directory.to_string()) {
+        for file in files {
+            let path = file.unwrap().path();
+            println!("Location: {}", path.to_str().unwrap());
+        }
     } else {
         panic!("Directory: '{}' not found!", directory);
-    };
-
-    for file in files {
-        let path = file.unwrap().path();
-        println!("Location: {}", path.to_str().unwrap());
     }
-
     // TODO Replace this with proper result
     return vec![Motion::get_test("add 1".to_string(), "sub 1".to_string())];
 }

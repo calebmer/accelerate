@@ -83,21 +83,21 @@ fn main() {
             accelerator::shift(&mut driver, &mots, n);
         } else {
             println!("Error parsing the number argument for add!");
-        };
+        }
     }
     if let Some(m) = matches.subcommand_matches("sub") {
         if let Ok(n) = m.value_of("n").unwrap_or("-1").parse() {
             accelerator::shift(&mut driver, &mots, n);
         } else {
             println!("Error parsing the number argument for sub!");
-        };
+        }
     }
     if let Some(m) = matches.subcommand_matches("goto") {
         if let Ok(n) = m.value_of("n").unwrap().parse() {
             accelerator::goto(&mut driver, &mots, n);
         } else {
             println!("Error parsing the number argument for goto!");
-        };
+        }
     }
 }
 
