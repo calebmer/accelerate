@@ -9,13 +9,15 @@ extern crate clap;
 use clap::{App, Arg, SubCommand};
 
 use drivers::Driver;
+use motions::Motion;
 
 fn main() {
     let matches = App::new("accelerate")
                       .version("2.0.0")
                       .global_version(true)
                       .unified_help_message(true)
-                      .author("Caleb Meredith <calebmeredith8@gmail.com>")
+                      .author("Caleb Meredith <calebmeredith8@gmail.com>\n
+                               Victor M. Suarez <svmnotn@gmail.com>")
                       .about("Accelerate back and forth through time for your database or other \
                               in-place systems")
                       .arg(Arg::with_name("target")
@@ -38,8 +40,7 @@ fn main() {
                       .subcommand(SubCommand::with_name("reset")
                                       .about("subtract then add all previous motions"))
                       .subcommand(SubCommand::with_name("create")
-                                      .about("create a new motion named <name> using the \
-                                              template")
+                                      .about("create a new motion named <name> using the template")
                                       .arg(Arg::from_usage("<name>")))
                       .subcommand(SubCommand::with_name("add")
                                       .about("add n motions (default n = 1)")
@@ -100,13 +101,11 @@ fn main() {
     }
 }
 
-fn ls(directory: String) {
-    let mots = motions::get(directory);
+fn ls(mots: &Vec<Motion>) {
     for mot in mots {
         println!("{}", mot.name);
     }
 }
 
 // TODO Implement
-fn create(directory: String, name: String) {
-}
+fn create(directory: String, name: String) {}
