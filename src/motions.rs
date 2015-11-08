@@ -7,7 +7,7 @@ pub struct Motion {
 }
 
 impl Motion {
-    pub fn get(add: String, sub: String) -> Self {
+    pub fn get_test(add: String, sub: String) -> Self {
         Motion {
             name: "motion".to_string(),
             add_name: "motion.add".to_string(),
@@ -33,6 +33,7 @@ pub fn get(directory: String) -> Vec<Motion> {
       panic!("Directory {0} did not exist!\n  Error: {1}", directory, e);
     }
   }
-  // TODO Replace this
-  return vec![Motion::get("add 1".to_string(), "sub 1".to_string())];
+
+    // TODO Replace this with proper result
+    return vec![Motion::get_test("add 1".to_string(), "sub 1".to_string())];
 }

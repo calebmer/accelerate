@@ -3,10 +3,10 @@ use motions::Motion;
 use accelerator;
 
 fn get_motions() -> Vec<Motion> {
-    return vec![Motion::get("add 1".to_string(), "sub 1".to_string()),
-                Motion::get("add 2".to_string(), "sub 2".to_string()),
-                Motion::get("add 3".to_string(), "sub 3".to_string()),
-                Motion::get("add 4".to_string(), "sub 4".to_string())];
+    return vec![Motion::get_test("add 1".to_string(), "sub 1".to_string()),
+                Motion::get_test("add 2".to_string(), "sub 2".to_string()),
+                Motion::get_test("add 3".to_string(), "sub 3".to_string()),
+                Motion::get_test("add 4".to_string(), "sub 4".to_string())];
 }
 
 fn get_driver() -> DefaultDriver {
