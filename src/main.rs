@@ -55,51 +55,48 @@ fn main() {
     let target = matches.value_of("target").unwrap();
     let directory = matches.value_of("directory").unwrap_or(".");
 
-    if let Some(matches) = matches.subcommand_matches("ls") {
-        ls(directory.to_string());
-    }
-    if let Some(matches) = matches.subcommand_matches("create") {
-        create(directory.to_string(),
-               matches.value_of("name").unwrap().to_string());
-    }
-
     let mots = motions::get(directory.to_string());
     // TODO Adquire driver properly!
     let mut driver = drivers::DefaultDriver::new(target.to_string());
 
-    if let Some(matches) = matches.subcommand_matches("redo") {
+    if let Some(_) = matches.subcommand_matches("ls") {
+        ls(&mots);
+    }
+    if let Some(matches) = matches.subcommand_matches("create") {
+        create(directory.to_string(), matches.value_of("name").unwrap().to_string());
+    }
+    if let Some(_) = matches.subcommand_matches("redo") {
         accelerator::redo(&mut driver, &mots);
     }
-    if let Some(matches) = matches.subcommand_matches("up") {
+    if let Some(_) = matches.subcommand_matches("up") {
         accelerator::up(&mut driver, &mots);
     }
-    if let Some(matches) = matches.subcommand_matches("down") {
+    if let Some(_) = matches.subcommand_matches("down") {
         accelerator::down(&mut driver, &mots);
     }
-    if let Some(matches) = matches.subcommand_matches("reset") {
+    if let Some(_) = matches.subcommand_matches("reset") {
         accelerator::reset(&mut driver, &mots);
     }
-    // TODO put in correct errors
-    if let Some(matches) = matches.subcommand_matches("add") {
-        let n = matches.value_of("n").unwrap_or("1").parse();
-        match n {
-            Ok(i) => accelerator::shift(&mut driver, &mots, i),
-            Err(_) => println!("Error"),
-        }
+    if let Some(m) = matches.subcommand_matches("add") {
+        if let Ok(n) = m.value_of("n").unwrap_or("1").parse() {
+            accelerator::shift(&mut driver, &mots, n);
+        } else {
+            println!("Error parsing the number argument for add!");
+        };
     }
-    if let Some(matches) = matches.subcommand_matches("sub") {
-        let n = matches.value_of("n").unwrap_or("-1").parse();
-        match n {
-            Ok(i) => accelerator::shift(&mut driver, &mots, i),
-            Err(_) => println!("Error"),
-        }
+    if let Some(m) = matches.subcommand_matches("sub") {
+        if let Ok(n) = m.value_of("n").unwrap_or("-1").parse() {
+            accelerator::shift(&mut driver, &mots, n);
+        } else {
+            println!("Error parsing the number argument for sub!");
+        };
     }
-    if let Some(matches) = matches.subcommand_matches("goto") {
-        let n = matches.value_of("n").unwrap().parse();
-        match n {
-            Ok(i) => accelerator::goto(&mut driver, &mots, i),
-            Err(_) => println!("Error"),
-        }
+    if let Some(m) = matches.subcommand_matches("goto") {
+        if let Ok(n) = m.value_of("n").unwrap().parse() {
+            accelerator::goto(&mut driver, &mots, n);
+        } else {
+            println!("Error parsing the number argument for goto!");
+        };
     }
 }
 
