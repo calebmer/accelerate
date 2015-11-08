@@ -21,19 +21,28 @@ impl Motion {
 use std::fs;
 // TODO implement
 pub fn get(directory: String) -> Vec<Motion> {
-  let paths = fs::read_dir(directory.clone());
-  match paths {
-    Ok(paths) => {
-      for path in paths {
-          // TODO add Motion::get that takes the file
-          //println!("Name: {}", path);
-      }
-    },
-    Err(e) => {
-      panic!("Directory {0} did not exist!\n  Error: {1}", directory, e);
+    let motions: Vec<Motion> = Vec::new();
+    let files = if let Ok(fs) = fs::read_dir(directory.clone()) {
+        fs
+    } else {
+        panic!("Directory: '{}' not found!", directory);
+    };
+
+    for file in files {
+        let path = file.unwrap().path();
+        println!("Location: {}", path.to_str().unwrap());
     }
-  }
 
     // TODO Replace this with proper result
     return vec![Motion::get_test("add 1".to_string(), "sub 1".to_string())];
+}
+
+extern crate regex;
+use self::regex::Regex;
+
+// TODO implement
+pub fn get_template(directory: String) {
+    let template_add = Regex::new("/^([x.]+)([\\-_ ~]+)template\\.add(.*)$/i").unwrap();
+    let template_sub = Regex::new("/^([x.]+)([\\-_ ~]+)template\\.sub(.*)$/i").unwrap();
+
 }
