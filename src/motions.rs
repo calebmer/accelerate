@@ -1,21 +1,21 @@
 pub struct Motion {
-    pub name: String,
-    pub add_name: String,
-    pub sub_name: String,
-    pub add: String,
-    pub sub: String,
+  pub name: String,
+  pub add_name: String,
+  pub sub_name: String,
+  pub add: String,
+  pub sub: String,
 }
 
 impl Motion {
-    pub fn get_test(add: String, sub: String) -> Self {
-        Motion {
-            name: "motion".to_string(),
-            add_name: "motion.add".to_string(),
-            sub_name: "motion.sub".to_string(),
-            add: add,
-            sub: sub,
-        }
+  pub fn get_test(add: String, sub: String) -> Self {
+    Motion {
+      name: "motion".to_string(),
+      add_name: "motion.add".to_string(),
+      sub_name: "motion.sub".to_string(),
+      add: add,
+      sub: sub,
     }
+  }
 }
 
 use std::fs;
