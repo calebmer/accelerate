@@ -5,92 +5,82 @@ pub mod drivers;
 #[cfg(test)]
 mod tests;
 
-#[macro_use]
+#[macro_use(crate_version,value_t)]
 extern crate clap;
-use clap::{App, Arg, SubCommand};
+use clap::{App, SubCommand};
 
 use drivers::Driver;
 use motions::Motion;
 
 fn main() {
+  // Create what is used to interpretate user input from the CLI
   let matches = App::new("accelerate")
                   .version(&crate_version!())
                   .global_version(true)
                   .unified_help_message(true)
                   .author("Caleb Meredith <calebmeredith8@gmail.com>\nVictor M. Suarez <svmnotn@gmail.com>")
                   .about("Accelerate back and forth through time for your database or other in-place systems")
-                  .arg(Arg::with_name("target")
-                         .short("t")
-                         .long("target")
-                         .help("the targeted url to accelerate")
-                         .takes_value(true)
-                         .required(true))
-                  .arg(Arg::with_name("directory")
-                         .short("d")
-                         .long("directory")
-                         .help("the directory holding the motions")
-                         .takes_value(true))
-                  .subcommand(SubCommand::with_name("ls").about("list all motions to be used"))
-                  .subcommand(SubCommand::with_name("redo").about("subtract then add the last motion"))
-                  .subcommand(SubCommand::with_name("up").about("add all remaining motions"))
-                  .subcommand(SubCommand::with_name("down").about("subtract all previous motions"))
-                  .subcommand(SubCommand::with_name("reset").about("subtract then add all previous motions"))
+                  .args_from_usage("--target=<url>     -t 'the targeted url to accelerate'
+                                    --directory=[path] -d 'the directory holding the motions (defaults to the current dir)'")
+                  .subcommand(SubCommand::with_name("ls").about("lists all motions in the directory"))
+                  .subcommand(SubCommand::with_name("redo").about("subtracts then adds the last motion"))
+                  .subcommand(SubCommand::with_name("up").about("adds all remaining motions"))
+                  .subcommand(SubCommand::with_name("down").about("subtracts all previous motions"))
+                  .subcommand(SubCommand::with_name("reset").about("subtracts then adds all previous motions"))
                   .subcommand(SubCommand::with_name("create")
-                                .about("create a new motion named <name> using the template")
-                                .arg(Arg::from_usage("<name>")))
+                                .about("create a new motion using the template")
+                                .arg_from_usage("<name> 'the name to use for the new motion'"))
                   .subcommand(SubCommand::with_name("add")
-                                .about("add n motions (default n = 1)")
-                                .arg(Arg::from_usage("[n]")))
+                                .about("adds n motions")
+                                .arg_from_usage("[n] 'how many motions to add, defaults to 1'"))
                   .subcommand(SubCommand::with_name("sub")
-                                .about("subtract n motions (default n = 1)")
-                                .arg(Arg::from_usage("[n]")))
+                                .about("subtracts n motions")
+                                .arg_from_usage("[n] 'how many motions to substract, defaults to 1'"))
                   .subcommand(SubCommand::with_name("goto")
-                                .about("go to the nth motion")
-                                .arg(Arg::from_usage("<n>")))
+                                .about("goes to the nth motion relative to the current motion")
+                                .arg_from_usage("--n=<n> 'the amount of motions to move relative to the current one,
+                                                 must be given as a number in the form of --n=[number]'"))
                   .get_matches();
-
-  let target = matches.value_of("target").unwrap();
-  let directory = matches.value_of("directory").unwrap_or(".");
-
-  let mots = motions::get(&directory.to_string());
+  // Get all the specified variables or set them to their default values
+  let target = matches.value_of("url").unwrap();
+  let directory = matches.value_of("path").unwrap_or(".");
+  // TODO change for proper get
+  let mots = motions::get();
   // TODO Adquire driver properly!
   let mut driver = drivers::DefaultDriver::new(target.to_string());
-
-  if let Some(_) = matches.subcommand_matches("ls") {
-    ls(&mots);
-  }
-  if let Some(matches) = matches.subcommand_matches("create") {
-    create(directory.to_string(),
-           matches.value_of("name").unwrap().to_string());
-  }
-  if let Some(_) = matches.subcommand_matches("redo") {
-    accelerator::redo(&mut driver, &mots);
-  }
-  if let Some(_) = matches.subcommand_matches("up") {
-    accelerator::up(&mut driver, &mots);
-  }
-  if let Some(_) = matches.subcommand_matches("down") {
-    accelerator::down(&mut driver, &mots);
-  }
-  if let Some(_) = matches.subcommand_matches("reset") {
-    accelerator::reset(&mut driver, &mots);
-  }
-  if let Some(m) = matches.subcommand_matches("add") {
-    accelerator::shift(&mut driver,
-                       &mots,
-                       value_t!(m.value_of("n"), isize).unwrap_or(1));
-  }
-  if let Some(m) = matches.subcommand_matches("sub") {
-    accelerator::shift(&mut driver,
-                       &mots,
-                       value_t!(m.value_of("n"), isize).unwrap_or(-1));
-  }
-  if let Some(m) = matches.subcommand_matches("goto") {
-    if let Ok(n) = m.value_of("n").unwrap().parse() {
-      accelerator::goto(&mut driver, &mots, n);
-    } else {
-      println!("Error parsing the number argument for goto!");
+  // Go through and find what matched
+  match matches.subcommand() {
+    ("ls", Some(_)) => ls(&mots),
+    ("up", Some(_)) => accelerator::up(&mut driver, &mots),
+    ("down", Some(_)) => accelerator::down(&mut driver, &mots),
+    ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
+    ("reset", Some(_)) => accelerator::reset(&mut driver, &mots),
+    ("create", Some(m)) => {
+      create(directory.to_string(),
+             value_t!(m.value_of("name"), String).unwrap())
     }
+    ("add", Some(m)) => {
+      accelerator::shift(&mut driver,
+                         &mots,
+                         value_t!(m.value_of("n"), isize).unwrap_or(1))
+    }
+    ("sub", Some(m)) => {
+      accelerator::shift(&mut driver,
+                         &mots,
+                         value_t!(m.value_of("n"), isize).unwrap_or(1) * -1)
+    }
+    ("goto", Some(m)) => {
+      accelerator::goto(&mut driver,
+                        &mots,
+                        value_t!(m.value_of("n"), isize).unwrap_or_else(|e| {
+                          println!("{}\n{}\nFor more information re-run with --help",
+                                   e,
+                                   m.usage());
+                          std::process::exit(1);
+                        }))
+    }
+    // NOP default in case nothing is passed
+    (_, _) => {}
   }
 }
 
