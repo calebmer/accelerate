@@ -5,6 +5,7 @@ pub mod drivers;
 #[cfg(test)]
 mod tests;
 
+#[macro_use]
 extern crate clap;
 use clap::{App, Arg, SubCommand};
 
@@ -55,20 +56,6 @@ fn main() {
   // TODO Adquire driver properly!
   let mut driver = drivers::DefaultDriver::new(target.to_string());
 
-    if let Some(m) = matches.subcommand_matches("add") {
-        if let Ok(n) = m.value_of("n").unwrap_or("1").parse() {
-            accelerator::shift(&mut driver, &mots, n);
-        } else {
-            println!("Error parsing the number argument for add!");
-        }
-    }
-    if let Some(m) = matches.subcommand_matches("sub") {
-        if let Ok(n) = m.value_of("n").unwrap_or("-1").parse() {
-            accelerator::shift(&mut driver, &mots, n);
-        } else {
-            println!("Error parsing the number argument for sub!");
-        }
-    }
   if let Some(_) = matches.subcommand_matches("ls") {
     ls(&mots);
   }
@@ -87,6 +74,16 @@ fn main() {
   }
   if let Some(_) = matches.subcommand_matches("reset") {
     accelerator::reset(&mut driver, &mots);
+  }
+  if let Some(m) = matches.subcommand_matches("add") {
+    accelerator::shift(&mut driver,
+                       &mots,
+                       value_t!(m.value_of("n"), isize).unwrap_or(1));
+  }
+  if let Some(m) = matches.subcommand_matches("sub") {
+    accelerator::shift(&mut driver,
+                       &mots,
+                       value_t!(m.value_of("n"), isize).unwrap_or(-1));
   }
   if let Some(m) = matches.subcommand_matches("goto") {
     if let Ok(n) = m.value_of("n").unwrap().parse() {
