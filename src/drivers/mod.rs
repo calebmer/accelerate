@@ -25,19 +25,13 @@ impl Driver for DefaultDriver {
   }
 
   fn set_status(&mut self, status: isize) -> &mut Self {
-    println!("Set Status of {0}\n\t from {1}\n\t to {2}",
-             self.target,
-             self.status,
-             status);
+    println!("Set Status of {0}\n\t from {1}\n\t to {2}", self.target, self.status, status);
     self.status = status;
     self
   }
 
   fn execute(&self, motion: &String) -> &Self {
-    println!("I am a {0}\n\t that says {1}\n\t while at {2}",
-             self.target,
-             motion,
-             self.status);
+    println!("I am a {0}\n\t that says {1}\n\t while at {2}", self.target, motion, self.status);
     self
   }
 }

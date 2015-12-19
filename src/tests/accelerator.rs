@@ -9,9 +9,7 @@ fn get_motions() -> Vec<Motion> {
               Motion::get_test("add 4".to_string(), "sub 4".to_string())];
 }
 
-fn get_driver() -> DefaultDriver {
-  return DefaultDriver::new("Test Driver".to_string());
-}
+fn get_driver() -> DefaultDriver { return DefaultDriver::new("Test Driver".to_string()); }
 
 #[test]
 fn up() {

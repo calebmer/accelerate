@@ -65,6 +65,4 @@ fn read_dir(directory: &String) -> Vec<String> {
 //
 
 // TODO remove this in favor of real implementation
-pub fn get() -> Vec<Motion> {
-  return vec![Motion::get_test()];
-}
+pub fn get() -> Vec<Motion> { return vec![Motion::get_test()]; }

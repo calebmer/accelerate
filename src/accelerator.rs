@@ -64,9 +64,7 @@ pub fn up<D: Driver>(driver: &mut D, motions: &Vec<Motion>) {
   goto(driver, motions, last);
 }
 
-pub fn down<D: Driver>(driver: &mut D, motions: &Vec<Motion>) {
-  goto(driver, motions, 0);
-}
+pub fn down<D: Driver>(driver: &mut D, motions: &Vec<Motion>) { goto(driver, motions, 0); }
 
 pub fn reset<D: Driver>(driver: &mut D, motions: &Vec<Motion>) {
   let status = driver.get_status();
