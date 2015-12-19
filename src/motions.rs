@@ -1,9 +1,9 @@
 pub struct Motion {
-  pub name: String,
-  pub add_name: String,
-  pub sub_name: String,
-  pub add: String,
-  pub sub: String,
+    pub name: String,
+    pub add_name: String,
+    pub sub_name: String,
+    pub add: String,
+    pub sub: String,
 }
 
 impl Motion {
@@ -17,18 +17,20 @@ impl Motion {
     }
   }
 }
+
 extern crate regex;
 use self::regex::Regex;
+use std::fs;
 
 struct Template {
-  add_name: String,
-  sub_name: String,
-  version: Vec<isize>,
-  separator: String,
-  extension: String,
-  add: String,
-  sub: String,
-  regex: Regex,
+    add_name: String,
+    sub_name: String,
+    version: Vec<isize>,
+    separator: String,
+    extension: String,
+    add: String,
+    sub: String,
+    regex: Regex,
 }
 
 // TODO implement
@@ -39,22 +41,23 @@ impl Template {
   }
 }
 
-use std::fs;
+    }
+}
 
 fn read_dir(directory: &String) -> Vec<String> {
-  let mut names = Vec::new();
-  if let Ok(entries) = fs::read_dir(directory.to_string()) {
-    for entry in entries {
-      if let Ok(file_name) = entry.unwrap().file_name().into_string() {
-        names.push(file_name);
-      } else {
-        panic!("File Name did not contain valid Unicode data");
-      }
+    let mut names = Vec::new();
+    if let Ok(entries) = fs::read_dir(directory.to_string()) {
+        for entry in entries {
+            if let Ok(file_name) = entry.unwrap().file_name().into_string() {
+                names.push(file_name);
+            } else {
+                panic!("File Name did not contain valid Unicode data");
+            }
+        }
+    } else {
+        panic!("Directory: '{}' not found!", directory);
     }
-  } else {
-    panic!("Directory: '{}' not found!", directory);
-  }
-  names
+    names
 }
 
 /*
