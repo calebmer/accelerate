@@ -5,7 +5,7 @@ pub mod drivers;
 #[cfg(test)]
 mod tests;
 
-#[macro_use(crate_version,value_t)]
+#[macro_use(crate_version,value_t, value_t_or_exit)]
 extern crate clap;
 use clap::{App, SubCommand};
 
@@ -55,32 +55,11 @@ fn main() {
     ("down", Some(_)) => accelerator::down(&mut driver, &mots),
     ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
     ("reset", Some(_)) => accelerator::reset(&mut driver, &mots),
-    ("create", Some(m)) => {
-      create(directory.to_string(),
-             value_t!(m.value_of("name"), String).unwrap())
-    }
-    ("add", Some(m)) => {
-      accelerator::shift(&mut driver,
-                         &mots,
-                         value_t!(m.value_of("n"), isize).unwrap_or(1))
-    }
-    ("sub", Some(m)) => {
-      accelerator::shift(&mut driver,
-                         &mots,
-                         value_t!(m.value_of("n"), isize).unwrap_or(1) * -1)
-    }
-    ("goto", Some(m)) => {
-      accelerator::goto(&mut driver,
-                        &mots,
-                        value_t!(m.value_of("n"), isize).unwrap_or_else(|e| {
-                          println!("{}\n{}\nFor more information re-run with --help",
-                                   e,
-                                   m.usage());
-                          std::process::exit(1);
-                        }))
-    }
-    // NOP default in case nothing is passed
-    (_, _) => {}
+    ("create", Some(m)) => create(directory.to_string(), value_t!(m.value_of("name"), String).unwrap()),
+    ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
+    ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
+    ("goto", Some(m)) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
+    _ => println!("Nothing to do!\nRe-run with --help for more information"),
   }
 }
 
