@@ -47,7 +47,7 @@ fn main() {
   // TODO change for proper get
   let mots = motions::get();
   // TODO Adquire driver properly!
-  let mut driver = drivers::DefaultDriver::new(target.to_string());
+  let mut driver = get_driver(target);
   // Go through and find what matched
   match matches.subcommand() {
     ("ls", Some(_)) => ls(&mots),
@@ -62,6 +62,8 @@ fn main() {
     _ => println!("Nothing to do!\nRe-run with --help for more information"),
   }
 }
+
+fn get_driver(target: &str) -> Box<Driver> { Box::new(drivers::DefaultDriver::new(target.to_string())) }
 
 fn ls(mots: &Vec<Motion>) {
   for mot in mots {

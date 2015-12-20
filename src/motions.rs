@@ -42,7 +42,7 @@ impl Template {
   }
 }
 
-fn read_dir(directory: &String) -> Vec<String> {
+fn read_dir(directory: &str) -> Vec<String> {
   let mut names = Vec::new();
   if let Ok(entries) = fs::read_dir(directory.to_string()) {
     for entry in entries {
