@@ -16,6 +16,16 @@ impl Motion {
       sub: "sub".to_string(),
     }
   }
+
+  pub fn test(n: usize) -> Self {
+    Motion {
+      name: "motion".to_string(),
+      add_name: "motion.add".to_string(),
+      sub_name: "motion.sub".to_string(),
+      add: "add: ".to_string() + &n.to_string(),
+      sub: "sub: ".to_string() + &n.to_string(),
+    }
+  }
 }
 
 extern crate regex;
