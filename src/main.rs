@@ -5,7 +5,7 @@ pub mod drivers;
 #[cfg(test)]
 mod tests;
 
-#[macro_use(crate_version,value_t, value_t_or_exit)]
+#[macro_use]
 extern crate clap;
 use clap::{App, SubCommand};
 
