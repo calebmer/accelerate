@@ -62,12 +62,11 @@ fn main() {
     ("ls", Some(m)) => ls(directory, mots, m.is_present("long")),
     ("create", Some(m)) => motions::create(directory, mots, value_t_or_exit!(m.value_of("name"), String)),
     ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
-    (cmd, Some(m)) => gate((cmd, m), driver, mots, matches.is_present("yes")),
-    _ => println!("Nothing to do!\nRe-run with --help for more information"),
+    (cmd, m) => gate((cmd, m), driver, mots, matches.is_present("yes")),
   }
 }
 
-fn gate(matches: (&str, &ArgMatches), mut driver: Box<Driver>, mots: Vec<Motion>, gate: bool) {
+fn gate(matches: (&str, Option<&ArgMatches>), mut driver: Box<Driver>, mots: Vec<Motion>, gate: bool) {
   if !gate {
     println!("You might remove information by doing this action.\nDo you wish to continue? (Y/N)");
     let stdin = stdin();
@@ -93,9 +92,9 @@ fn gate(matches: (&str, &ArgMatches), mut driver: Box<Driver>, mots: Vec<Motion>
     ("down", _) => accelerator::down(&mut driver, &mots),
     ("redo", _) => accelerator::redo(&mut driver, &mots),
     ("reset", _) => accelerator::reset(&mut driver, &mots),
-    ("sub", m) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
-    ("shift", m) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
-    ("goto", m) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
+    ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
+    ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
+    ("goto", Some(m)) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
     _ => println!("Nothing to do!\nRe-run with --help for more information"),
   }
 }
