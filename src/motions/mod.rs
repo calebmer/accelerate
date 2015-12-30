@@ -215,7 +215,6 @@ fn read_directory(directory: &String) -> Vec<DirFile> {
     for entry in entries {
       if let Ok(e) = entry {
         let path = e.path();
-        println!("{:?}", &path);
         if let Ok(meta) = fs::metadata(&path) {
           if meta.is_dir() {
             names.append(&mut read_directory(&path.str()));
