@@ -23,11 +23,13 @@ fn main() {
                   .about("Accelerate back and forth through time for your database or other in-place systems")
                   .args_from_usage("--target=<url>     -t 'the targeted url to accelerate'
                                     --directory=[path] -d 'the directory holding the motions (defaults to the current dir)'")
-                  .subcommand(SubCommand::with_name("ls").about("lists all motions in the directory"))
                   .subcommand(SubCommand::with_name("redo").about("subtracts then adds the last motion"))
                   .subcommand(SubCommand::with_name("up").about("adds all remaining motions"))
                   .subcommand(SubCommand::with_name("down").about("subtracts all previous motions"))
                   .subcommand(SubCommand::with_name("reset").about("subtracts then adds all previous motions"))
+                  .subcommand(SubCommand::with_name("ls")
+                                .about("lists all motions in the directory")
+                                .arg_from_usage("--long -l 'Display all motion information'"))
                   .subcommand(SubCommand::with_name("create")
                                 .about("create a new motion using the template")
                                 .arg_from_usage("<name> 'the name to use for the new motion'"))
@@ -53,12 +55,12 @@ fn main() {
   let mut driver = get_driver(target);
   // Go through and find what matched
   match matches.subcommand() {
-    ("ls", Some(_)) => ls(directory, mots),
     ("up", Some(_)) => accelerator::up(&mut driver, &mots),
     ("down", Some(_)) => accelerator::down(&mut driver, &mots),
     ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
     ("reset", Some(_)) => accelerator::reset(&mut driver, &mots),
-    ("create", Some(m)) => create(directory, value_t_or_exit!(m.value_of("name"), String)),
+    ("ls", Some(m)) => ls(directory, mots, m.is_present("long")),
+    ("create", Some(m)) => motions::create(directory, mots, value_t_or_exit!(m.value_of("name"), String)),
     ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
     ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
     ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
@@ -69,11 +71,13 @@ fn main() {
 
 fn get_driver(target: String) -> Box<Driver> { Box::new(drivers::default::Driver::new(target)) }
 
-fn ls(dir: String, mots: Vec<Motion>) {
+fn ls(dir: String, mots: Vec<Motion>, long: bool) {
   println!("{} contains: {} motions\n", dir, mots.len());
   for mot in mots {
-    println!("{}", mot.name);
+    if long {
+      println!("{},", mot);
+    } else {
+      println!("{}", mot.name);
+    }
   }
 }
-
-fn create(directory: String, name: String) { motions::create(directory, name); }
