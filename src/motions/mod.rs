@@ -59,27 +59,32 @@ impl fmt::Display for Motion {
 /// All motion files are turned into the special motion structure.
 pub fn discover(directory: &String) -> Vec<Motion> {
   let names = read_directory(directory);
-  let cookie = template::Template::get(directory, &names);
-  let mut motion_names: Vec<String> = names.into_iter().filter(|name| cookie.regex.is_match(name)).collect();
+  let cookie = template::Template::get(&names);
+  let mut motion_names: Vec<DirFile> = names.into_iter().filter(|a| cookie.regex.is_match(&a.name)).collect();
   motion_names.sort();
   let mut motions_add = Vec::new();
   let mut motions_sub = Vec::new();
 
-  while let Some(n) = motion_names.pop() {
-    match cookie.get_op(&n) {
-      Add => motions_add.push(n),
-      Sub => motions_sub.push(n),
+  while let Some(dirf) = motion_names.pop() {
+    match cookie.get_op(&dirf.name) {
+      Add => motions_add.push(dirf),
+      Sub => motions_sub.push(dirf),
     }
   }
 
   let mut motions = Vec::new();
 
   while motions_add.len() != 0 {
-    let add_name = motions_add.pop().unwrap();
-    let sub_name = motions_sub.pop().unwrap();
-
-    if disambiguate(&cookie, &add_name) == disambiguate(&cookie, &sub_name) {
-      motions.push(Motion::new(&cookie, directory, add_name, sub_name));
+    if let Some(add) = motions_add.pop() {
+      if let Some(sub) = motions_sub.pop() {
+        if disambiguate(&cookie, &add.name) == disambiguate(&cookie, &sub.name) {
+          motions.push(Motion::new(&cookie, &add.dir, add.name, sub.name));
+        }
+      } else {
+        panic!("Sub Name was none");
+      }
+    } else {
+      panic!("Add Name was none");
     }
   }
   motions
@@ -124,7 +129,7 @@ fn pad_number(num: usize, max: usize) -> String {
 /// If there might be more digits then allowed by the template, an error is
 /// thrown.
 pub fn create(directory: String, mut motions: Vec<Motion>, name: String) {
-  let cookie = template::Template::get(&directory, &read_directory(&directory));
+  let cookie = template::Template::get(&read_directory(&directory));
   let motion_last = motions.pop().unwrap();
 
   let mut version = motion_last.version;
@@ -162,20 +167,73 @@ fn disambiguate(tmp: &template::Template, name: &String) -> String { tmp.regex.r
 
 #[allow(unused_must_use)]
 fn read_file(dir: &String, name: &str) -> String {
-  let mut f = File::open(dir.clone() + r"\" + name).unwrap();
-  let mut s = String::new();
-  f.read_to_string(&mut s);
-  s
+  match File::open(dir.clone() + r"\" + name) {
+    Ok(mut f) => {
+      let mut s = String::new();
+      f.read_to_string(&mut s);
+      s
+    }
+    Err(e) => panic!("Could not read: {}\n in: {}\n due to: {}", name, dir, e),
+  }
 }
 
-fn read_directory(directory: &String) -> Vec<String> {
+trait Visible{
+  fn str(&self) -> String;
+}
+
+impl Visible for PathBuf {
+  fn str(&self) -> String {
+    if let Some(s) = self.to_str() {
+      return s.to_string();
+    } else {
+      panic!("String was none");
+    }
+  }
+}
+
+use std::ffi::OsStr;
+
+impl Visible for OsStr {
+  fn str(&self) -> String {
+    if let Some(file_name) = self.to_str() {
+      file_name.to_string()
+    } else {
+      panic!("File name did not contain valid Unicode data");
+    }
+  }
+}
+
+#[derive(Eq, PartialEq, Ord, PartialOrd)]
+pub struct DirFile {
+  dir: String,
+  name: String,
+}
+
+fn read_directory(directory: &String) -> Vec<DirFile> {
   let mut names = Vec::new();
   if let Ok(entries) = fs::read_dir(directory.to_string()) {
     for entry in entries {
-      if let Ok(file_name) = entry.unwrap().file_name().into_string() {
-        names.push(file_name);
+      if let Ok(e) = entry {
+        let path = e.path();
+        println!("{:?}", &path);
+        if let Ok(meta) = fs::metadata(&path) {
+          if meta.is_dir() {
+            names.append(&mut read_directory(&path.str()));
+          } else {
+            if let Some(file_name) = path.file_name() {
+              names.push(DirFile {
+                dir: directory.clone(),
+                name: file_name.str(),
+              });
+            } else {
+              panic!("File name did not contain valid Unicode data");
+            }
+          }
+        } else {
+          panic!("Meta not found!");
+        }
       } else {
-        panic!("File name did not contain valid Unicode data");
+        panic!("Entry not found!");
       }
     }
   } else {

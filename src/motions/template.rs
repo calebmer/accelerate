@@ -2,6 +2,7 @@
 //! system's motions directory.
 use operation::Operation;
 use operation::Operation::*;
+use super::DirFile;
 extern crate regex;
 use self::regex::Regex;
 use std::fs;
@@ -35,17 +36,17 @@ impl Template {
   /// Gets the template for a motions directory. Searches all the file names
   /// for a pair of files matching the accelerator template format and turns
   /// those into a usable type by the motions module.
-  pub fn get(directory: &String, names: &Vec<String>) -> Self {
+  pub fn get(names: &Vec<DirFile>) -> Self {
     let template_add = Regex::new(r"^([x.]+)([-_ ~]+)template\.add(.*)$").unwrap();
     let template_sub = Regex::new(r"^([x.]+)([-_ ~]+)template\.sub(.*)$").unwrap();
-    let add_name = names.iter().find(|a| template_add.is_match(a)).unwrap();
-    let sub_name = names.iter().find(|a| template_sub.is_match(a)).unwrap();
+    let add = names.iter().find(|a| template_add.is_match(&a.name)).unwrap();
+    let sub = names.iter().find(|a| template_sub.is_match(&a.name)).unwrap();
 
-    if template_add.replace_all(add_name, "$1,$2,$3") != template_sub.replace_all(sub_name, "$1,$2,$3") {
+    if template_add.replace_all(&add.name, "$1,$2,$3") != template_sub.replace_all(&sub.name, "$1,$2,$3") {
       panic!("And and sub template names do not equal each other")
     }
 
-    let captures = template_add.captures(add_name).unwrap();
+    let captures = template_add.captures(&add.name).unwrap();
     let version: Vec<usize> = captures.at(1).unwrap().split('.').map(|s| s.len()).collect();
     let separator = captures.at(2).unwrap();
     let extension = captures.at(3).unwrap();
@@ -56,13 +57,13 @@ impl Template {
     version_regex.pop();
     let regx_str = &(String::from("^(") + &version_regex + ")" + &regex::quote(separator) + r"(.+)\.(add|sub)" + &regex::quote(extension) + "$");
     Template {
-      add_name: add_name.clone(),
-      sub_name: sub_name.clone(),
+      add: super::read_file(&add.dir, &add.name),
+      sub: super::read_file(&sub.dir, &sub.name),
+      add_name: add.name.clone(),
+      sub_name: sub.name.clone(),
       version: captures.at(1).unwrap().split('.').map(|s| s.len()).collect(),
       separator: separator.to_string(),
       extension: extension.to_string(),
-      add: super::read_file(&directory, add_name),
-      sub: super::read_file(&directory, sub_name),
       regex: Regex::new(regx_str).unwrap(),
     }
   }
