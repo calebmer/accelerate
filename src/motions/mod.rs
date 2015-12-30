@@ -6,6 +6,7 @@ use std::fs;
 use std::path::*;
 use std::fs::File;
 use std::io::prelude::*;
+use std::fmt;
 
 /// The motion which will be applied to the driver. Can be either added or
 /// subbed.
@@ -34,16 +35,17 @@ impl Motion {
       extension: tmp.extension.clone(),
     }
   }
+}
 
-  /// A simple function to be used in tests to get a sample motion object.
-  pub fn test(n: usize) -> Self {
-    Motion {
-      name: "test".to_string(),
-      add: "add: ".to_string() + &n.to_string(),
-      sub: "sub: ".to_string() + &n.to_string(),
-      version: vec![n, n + 1, n + 2],
-      extension: String::from(""),
-    }
+impl fmt::Display for Motion {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f,
+           "Motion [name: {}, version: {:?}, extension: {}, add: {}, sub: {}]",
+           self.name,
+           self.version,
+           self.extension,
+           self.add,
+           self.sub)
   }
 }
 
