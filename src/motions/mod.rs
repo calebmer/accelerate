@@ -7,6 +7,7 @@ pub struct Motion {
   pub name: String,
   pub add_name: String,
   pub sub_name: String,
+  pub version: Vec<usize>,
   pub add: String,
   pub sub: String,
 }
@@ -17,18 +18,9 @@ impl Motion {
       name: tmp.get_name(&add),
       add: read_file(&dir, &add),
       sub: read_file(&dir, &sub),
+      version: version(tmp, &add),
       add_name: add,
       sub_name: sub,
-    }
-  }
-
-  fn get_test() -> Self {
-    Motion {
-      name: "motion".to_string(),
-      add_name: "motion.add".to_string(),
-      sub_name: "motion.sub".to_string(),
-      add: "add".to_string(),
-      sub: "sub".to_string(),
     }
   }
 
@@ -39,8 +31,17 @@ impl Motion {
       sub_name: "motion.sub".to_string(),
       add: "add: ".to_string() + &n.to_string(),
       sub: "sub: ".to_string() + &n.to_string(),
+      version: vec![n,n+1,n+2],
     }
   }
+}
+
+fn version(tmp: &template::Template, name: &String) -> Vec<usize> {
+  let mut version = Vec::new();
+  for v in tmp.regex.replace_all(&name, "$1").split('.') {
+    version.push(v.parse().unwrap());
+  }
+  version
 }
 
 fn disambiguate(tmp: &template::Template, name: &String) -> String { tmp.regex.replace_all(&name, "$1,$2") }
@@ -70,12 +71,12 @@ fn read_directory(directory: &String) -> Vec<String> {
 }
 
 pub fn discover(directory: &String) -> Vec<Motion> {
-  let names = read_directory(&directory);
-  let cookie = template::Template::get(&directory, &names);
+  let names = read_directory(directory);
+  let cookie = template::Template::get(directory, &names);
   let mut motion_names: Vec<String> = names.into_iter().filter(|name| cookie.regex.is_match(name)).collect();
   motion_names.sort();
-  let mut motions_add: Vec<String> = Vec::new();
-  let mut motions_sub: Vec<String> = Vec::new();
+  let mut motions_add = Vec::new();
+  let mut motions_sub = Vec::new();
 
   while let Some(n) = motion_names.pop() {
     match cookie.get_op(&n) {
@@ -84,7 +85,7 @@ pub fn discover(directory: &String) -> Vec<Motion> {
     }
   }
 
-  let mut motions: Vec<Motion> = Vec::new();
+  let mut motions = Vec::new();
 
   while motions_add.len() != 0 {
     let add_name = motions_add.pop().unwrap();
@@ -94,6 +95,12 @@ pub fn discover(directory: &String) -> Vec<Motion> {
       motions.push(Motion::new(&cookie, directory, add_name, sub_name));
     }
   }
-
   motions
+}
+
+pub fn create(directory: &String, name: &String) {
+  let cookie = template::Template::get(directory, &read_directory(directory));
+  let motion_last = discover(directory).pop().unwrap();
+
+
 }
