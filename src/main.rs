@@ -36,10 +36,13 @@ fn main() {
                   .subcommand(SubCommand::with_name("sub")
                                 .about("subtracts n motions")
                                 .arg_from_usage("[n] 'how many motions to substract, defaults to 1'"))
-                  .subcommand(SubCommand::with_name("goto")
+                  .subcommand(SubCommand::with_name("shift")
                                 .about("goes to the nth motion relative to the current motion")
                                 .arg_from_usage("--n=<n> 'the amount of motions to move relative to the current one,
                                                  must be given as a number in the form of --n=[number]'"))
+                  .subcommand(SubCommand::with_name("goto")
+                                .about("go to the nth motion")
+                                .arg_from_usage("<n> 'the motion to go to, 0 based'"))
                   .get_matches();
   // Get all the specified variables or set them to their default values
   let target = matches.value_of("url").unwrap();
@@ -54,9 +57,10 @@ fn main() {
     ("down", Some(_)) => accelerator::down(&mut driver, &mots),
     ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
     ("reset", Some(_)) => accelerator::reset(&mut driver, &mots),
-    ("create", Some(m)) => create(directory.to_string(), value_t!(m.value_of("name"), String).unwrap()),
+    ("create", Some(m)) => create(directory.to_string(), value_t_or_exit!(m.value_of("name"), String)),
     ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
     ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
+    ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
     ("goto", Some(m)) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
     _ => println!("Nothing to do!\nRe-run with --help for more information"),
   }
