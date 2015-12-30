@@ -1,4 +1,4 @@
-//! This module interacts with motions on the filesystem, turning them into a
+//! This module interacts with motions on the file system, turning them into a
 //! usable format for both the accelerator and the drivers.
 mod template;
 use operation::Operation::*;
@@ -15,7 +15,7 @@ pub struct Motion {
   pub name: String,
   /// The motion semantic version as a vector.
   pub version: Vec<usize>,
-  /// The motion’s file extension.
+  /// The motion's file extension.
   pub extension: String,
   /// The add file to be executed by the driver.
   pub add: String,
@@ -103,7 +103,7 @@ fn pad_number(num: usize, max: usize) -> String {
   s
 }
 
-/// Creates a new motion based off of the directory‘s template file and the
+/// Creates a new motion based off of the directory's template file and the
 /// last valid motion. The contents of the new pair of add and sub motion files
 /// will contain the contents of the template add and sub files respectively.
 ///

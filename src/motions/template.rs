@@ -1,5 +1,5 @@
 //! Motions module helper for getting the template information in the file
-//! system‘s motions directory.
+//! system's motions directory.
 use operation::Operation;
 use operation::Operation::*;
 extern crate regex;
@@ -13,7 +13,7 @@ pub struct Template {
   pub add_name: String,
   /// The name of the sub template file.
   pub sub_name: String,
-  /// An array defining the structure of the template‘s semantic version. If a
+  /// An array defining the structure of the template's semantic version. If a
   /// template defines a version of `xxx` the resulting vector will be roughly
   /// `[3]`. But if a template defines a version of `x.x.xx` the resulting
   /// vector will be roughly `[1,1,2]`.
@@ -67,9 +67,9 @@ impl Template {
     }
   }
 
-  /// Get’s the operation (add or sub) from a motion‘s name string. For
+  /// Get's the operation (add or sub) from a motion's name string. For
   /// example, a motion that matches the template and looks like
-  /// `001-hello-world.add` would return as an “add” operation.
+  /// `001-hello-world.add` would return as an "add" operation.
   pub fn get_op(&self, name: &String) -> Operation {
     if !self.regex.is_match(name) {
       panic!("Name must conform with the template string")
@@ -84,7 +84,7 @@ impl Template {
     }
   }
 
-  /// Get‘s the name of a motion without the version number, seperator,
+  /// Get's the name of a motion without the version number, seperator,
   /// operation, or extension. For example, a motion that matches the template
   /// and looks like `001-hello-world.add` would return `hello-world`.
   pub fn get_name(&self, name: &String) -> String {

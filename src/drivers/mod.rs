@@ -1,4 +1,4 @@
-//! This module deals with the “outside world”. Anything which can have a
+//! This module deals with the "outside world". Anything which can have a
 //! reversible string patch applied may be accelerated.
 
 /// A driver is anything which may be accelerated. For example a database like

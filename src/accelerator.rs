@@ -1,4 +1,4 @@
-//! This module holds all of the acceleration logic. We don‘t care about
+//! This module holds all of the acceleration logic. We don't care about
 //! driver implementations in this bit, we only care about moving through a
 //! series of motions (driver deltas) to get the final driver state.
 use drivers::Driver;
@@ -26,9 +26,9 @@ fn clamp(n: isize, min: isize, max: isize) -> isize {
 /// motions.
 ///
 /// Motions will always be applied moving from start to finish. So if start is
-/// a larger number then finish we will execute all the “sub” motions until we
+/// a larger number then finish we will execute all the "sub" motions until we
 /// reach finish, and if the start number is smaller we will execute all the
-/// “add” motions until we reach finish.
+/// "add" motions until we reach finish.
 fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mut finish: isize) {
   if start != finish {
     start = clamp(start, 0, motions.len() as isize);
@@ -62,7 +62,7 @@ fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mu
 }
 
 /// Starts at the current driver status and executes n motions in either the
-/// “add” or “sub” direction.
+/// "add" or "sub" direction.
 pub fn shift(driver: &mut Box<Driver>, motions: &Vec<Motion>, n: isize) {
   let start = driver.get_status();
   let finish = clamp(start + n, 0, motions.len() as isize);
@@ -76,24 +76,22 @@ pub fn goto(driver: &mut Box<Driver>, motions: &Vec<Motion>, finish: isize) {
   execute(driver, motions, status, finish);
 }
 
-/// “sub”s the last motion then “add”s it back.
+/// "sub's" the last motion then "add's" it back.
 pub fn redo(driver: &mut Box<Driver>, motions: &Vec<Motion>) {
   shift(driver, motions, -1);
   shift(driver, motions, 1);
 }
 
-/// Applies all remaining “add” motions to the driver.
+/// Applies all remaining "add" motions to the driver.
 pub fn up(driver: &mut Box<Driver>, motions: &Vec<Motion>) {
   let last = motions.len() as isize;
   goto(driver, motions, last);
 }
 
-/// Applies all remaining “sub” motions to the driver.
-pub fn down(driver: &mut Box<Driver>, motions: &Vec<Motion>) {
-  goto(driver, motions, 0);
-}
+/// Applies all remaining "sub" motions to the driver.
+pub fn down(driver: &mut Box<Driver>, motions: &Vec<Motion>) { goto(driver, motions, 0); }
 
-/// Applies all remaining “sub” motions to the driver before adding them all
+/// Applies all remaining "sub" motions to the driver before adding them all
 /// the subbed motions back.
 pub fn reset(driver: &mut Box<Driver>, motions: &Vec<Motion>) {
   let status = driver.get_status();
