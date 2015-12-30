@@ -10,6 +10,7 @@ use std::fmt;
 
 /// The motion which will be applied to the driver. Can be either added or
 /// subbed.
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct Motion {
   /// The disambiguated motion name.
   pub name: String,
@@ -203,7 +204,7 @@ impl Visible for OsStr {
   }
 }
 
-#[derive(Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct DirFile {
   dir: String,
   name: String,
