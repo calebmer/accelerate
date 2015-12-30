@@ -1,13 +1,13 @@
 mod template;
 use std::fs;
+use std::path::*;
 use std::fs::File;
 use std::io::prelude::*;
 
 pub struct Motion {
   pub name: String,
-  pub add_name: String,
-  pub sub_name: String,
   pub version: Vec<usize>,
+  pub extension: String,
   pub add: String,
   pub sub: String,
 }
@@ -19,19 +19,17 @@ impl Motion {
       add: read_file(&dir, &add),
       sub: read_file(&dir, &sub),
       version: version(tmp, &add),
-      add_name: add,
-      sub_name: sub,
+      extension: tmp.extension.clone(),
     }
   }
 
   pub fn test(n: usize) -> Self {
     Motion {
-      name: "motion".to_string(),
-      add_name: "motion.add".to_string(),
-      sub_name: "motion.sub".to_string(),
+      name: "test".to_string(),
       add: "add: ".to_string() + &n.to_string(),
       sub: "sub: ".to_string() + &n.to_string(),
       version: vec![n,n+1,n+2],
+      extension: String::from(""),
     }
   }
 }
@@ -98,9 +96,27 @@ pub fn discover(directory: &String) -> Vec<Motion> {
   motions
 }
 
-pub fn create(directory: &String, name: &String) {
-  let cookie = template::Template::get(directory, &read_directory(directory));
-  let motion_last = discover(directory).pop().unwrap();
+pub fn create(directory: String, name: String) {
+  let cookie = template::Template::get(&directory, &read_directory(&directory));
+  let motion_last = discover(&directory).pop().unwrap();
 
+  let mut version = motion_last.version.clone();
+  let i = version.len();
+  version[i - 1] += 1;
+  let mut version_str = String::new();
+  for j in 0..i {
+    let mut s = version[j].to_string();
+    while s.len() < cookie.version[j]{
+      s = 0.to_string() + &s;
+    }
+    version_str.push_str(&s);
+    version_str.push('.');
+  }
+  version_str.pop();
 
+  let mut path = PathBuf::from(&directory);
+  path.push(version_str + &cookie.separator + &name + ".add" + &cookie.extension);
+  println!("{:?}", path);
+  let mut f = File::create(path.as_path()).unwrap();
+  f.write_all(cookie.add.as_bytes()).unwrap();
 }

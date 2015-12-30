@@ -75,4 +75,4 @@ fn ls(dir: String, mots: Vec<Motion>) {
   }
 }
 
-fn create(directory: String, name: String) { motions::create(&directory, &name); }
+fn create(directory: String, name: String) { motions::create(directory, name); }
