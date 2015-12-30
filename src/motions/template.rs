@@ -38,7 +38,7 @@ impl Template {
     let len = version_regex.len();
     version_regex.pop();
     version_regex.pop();
-    let regx_str = &(String::new() + "^(" + &version_regex + ")" + &regex::quote(separator) + r"(.+)\.(add|sub)" + &regex::quote(extension) + "$");
+    let regx_str = &(String::from("^(") + &version_regex + ")" + &regex::quote(separator) + r"(.+)\.(add|sub)" + &regex::quote(extension) + "$");
     Template {
       add_name: add_name.clone(),
       sub_name: sub_name.clone(),

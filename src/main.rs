@@ -45,19 +45,19 @@ fn main() {
                                 .arg_from_usage("<n> 'the motion to go to, 0 based'"))
                   .get_matches();
   // Get all the specified variables or set them to their default values
-  let target = matches.value_of("url").unwrap();
+  let target = matches.value_of("url").unwrap().to_string();
   let directory = matches.value_of("path").unwrap_or(".").to_string();
   let mots = motions::discover(&directory);
   // TODO Adquire driver properly!
   let mut driver = get_driver(target);
   // Go through and find what matched
   match matches.subcommand() {
-    ("ls", Some(_)) => ls(&directory, &mots),
+    ("ls", Some(_)) => ls(directory, mots),
     ("up", Some(_)) => accelerator::up(&mut driver, &mots),
     ("down", Some(_)) => accelerator::down(&mut driver, &mots),
     ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
     ("reset", Some(_)) => accelerator::reset(&mut driver, &mots),
-    ("create", Some(m)) => create(directory.to_string(), value_t_or_exit!(m.value_of("name"), String)),
+    ("create", Some(m)) => create(directory, value_t_or_exit!(m.value_of("name"), String)),
     ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
     ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
     ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
@@ -66,14 +66,13 @@ fn main() {
   }
 }
 
-fn get_driver(target: &str) -> Box<Driver> { Box::new(drivers::DefaultDriver::new(target.to_string())) }
+fn get_driver(target: String) -> Box<Driver> { Box::new(drivers::DefaultDriver::new(target)) }
 
-fn ls(dir: &String, mots: &Vec<Motion>) {
+fn ls(dir: String, mots: Vec<Motion>) {
   println!("{} contains: {} motions\n", dir, mots.len());
   for mot in mots {
     println!("{}", mot.name);
   }
 }
 
-// TODO Implement
-fn create(directory: String, name: String) { motions::discover(&directory); }
+fn create(directory: String, name: String) { motions::create(&directory, &name); }
