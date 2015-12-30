@@ -50,7 +50,7 @@ fn main() {
   let mut driver = get_driver(target);
   // Go through and find what matched
   match matches.subcommand() {
-    ("ls", Some(_)) => ls(&mots),
+    ("ls", Some(_)) => ls(&directory, &mots),
     ("up", Some(_)) => accelerator::up(&mut driver, &mots),
     ("down", Some(_)) => accelerator::down(&mut driver, &mots),
     ("redo", Some(_)) => accelerator::redo(&mut driver, &mots),
@@ -65,7 +65,8 @@ fn main() {
 
 fn get_driver(target: &str) -> Box<Driver> { Box::new(drivers::DefaultDriver::new(target.to_string())) }
 
-fn ls(mots: &Vec<Motion>) {
+fn ls(dir: &String, mots: &Vec<Motion>) {
+  println!("{} contains: {} motions\n", dir, mots.len());
   for mot in mots {
     println!("{}", mot.name);
   }
