@@ -155,19 +155,7 @@ fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
   version
 }
 
-fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
-  let mut version_str = String::new();
-  for i in 0..mold.len() {
-    version_str.push_str(&pad_number(ver[i], mold[i]));
-    version_str.push('.');
-  }
-  version_str.pop();
-  version_str
-}
-
-fn disambiguate(tmp: &template::Template, name: &String) -> String {
-  tmp.regex.replace_all(&name, "$1,$2")
-}
+fn disambiguate(tmp: &template::Template, name: &String) -> String { tmp.regex.replace_all(&name, "$1,$2") }
 
 #[allow(unused_must_use)]
 fn read_file(dir: &String, name: &str) -> String {
@@ -191,12 +179,4 @@ fn read_directory(directory: &String) -> Vec<String> {
     panic!("Directory: '{}' not found!", directory);
   }
   names
-}
-
-fn pad_number(num: usize, max: usize) -> String {
-  let mut s = num.to_string();
-  while s.len() < max {
-    s = 0.to_string() + &s;
-  }
-  s
 }
