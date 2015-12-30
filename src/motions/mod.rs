@@ -18,7 +18,7 @@ impl Motion {
       name: tmp.get_name(&add),
       add: read_file(&dir, &add),
       sub: read_file(&dir, &sub),
-      version: version(tmp, &add),
+      version: version_from_string(tmp, &add),
       extension: tmp.extension.clone(),
     }
   }
@@ -34,7 +34,7 @@ impl Motion {
   }
 }
 
-fn version(tmp: &template::Template, name: &String) -> Vec<usize> {
+fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
   let mut version = Vec::new();
   for v in tmp.regex.replace_all(&name, "$1").split('.') {
     version.push(v.parse().unwrap());
@@ -96,27 +96,44 @@ pub fn discover(directory: &String) -> Vec<Motion> {
   motions
 }
 
+fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
+  let mut version_str = String::new();
+  for i in 0..mold.len() {
+    version_str.push_str(&pad_number(ver[i], mold[i]));
+    version_str.push('.');
+  }
+  version_str.pop();
+  version_str
+}
+
+fn pad_number(num: usize, max: usize) -> String{
+  let mut s = num.to_string();
+  while s.len() < max {
+    s = 0.to_string() + &s;
+  }
+  s
+}
+
 pub fn create(directory: String, name: String) {
   let cookie = template::Template::get(&directory, &read_directory(&directory));
   let motion_last = discover(&directory).pop().unwrap();
 
   let mut version = motion_last.version.clone();
-  let i = version.len();
-  version[i - 1] += 1;
-  let mut version_str = String::new();
-  for j in 0..i {
-    let mut s = version[j].to_string();
-    while s.len() < cookie.version[j]{
-      s = 0.to_string() + &s;
-    }
-    version_str.push_str(&s);
-    version_str.push('.');
-  }
-  version_str.pop();
+  let max = version.len();
+  version[max - 1] += 1;
 
   let mut path = PathBuf::from(&directory);
-  path.push(version_str + &cookie.separator + &name + ".add" + &cookie.extension);
-  println!("{:?}", path);
-  let mut f = File::create(path.as_path()).unwrap();
-  f.write_all(cookie.add.as_bytes()).unwrap();
+  path.push(version_to_string(&version, &cookie.version) + &cookie.separator + &name + ".add" + &cookie.extension);
+  println!("Writting: {:?} to the file system", path);
+  {
+    let mut f = File::create(path.as_path()).unwrap();
+    f.write_all(cookie.add.as_bytes()).unwrap();
+  }
+  path.pop();
+  path.push(version_to_string(&version, &cookie.version) + &cookie.separator + &name + ".sub" + &cookie.extension);
+  println!("Writting: {:?} to the file system", path);
+  {
+    let mut f = File::create(path.as_path()).unwrap();
+    f.write_all(cookie.sub.as_bytes()).unwrap();
+  }
 }
