@@ -85,6 +85,24 @@ pub fn discover(directory: &String) -> Vec<Motion> {
   motions
 }
 
+fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
+  let mut version_str = String::new();
+  for i in 0..mold.len() {
+    version_str.push_str(&pad_number(ver[i], mold[i]));
+    version_str.push('.');
+  }
+  version_str.pop();
+  version_str
+}
+
+fn pad_number(num: usize, max: usize) -> String {
+  let mut s = num.to_string();
+  while s.len() < max {
+    s = 0.to_string() + &s;
+  }
+  s
+}
+
 /// Creates a new motion based off of the directory‘s template file and the
 /// last valid motion. The contents of the new pair of add and sub motion files
 /// will contain the contents of the template add and sub files respectively.
@@ -102,27 +120,30 @@ pub fn discover(directory: &String) -> Vec<Motion> {
 /// change is incremented by 1 and padded with 0s to match the correct length.
 /// If there might be more digits then allowed by the template, an error is
 /// thrown.
-pub fn create(directory: String, name: String) {
+pub fn create(directory: String, mut motions: Vec<Motion>, name: String) {
   let cookie = template::Template::get(&directory, &read_directory(&directory));
-  let motion_last = discover(&directory).pop().unwrap();
+  let motion_last = motions.pop().unwrap();
 
-  let mut version = motion_last.version.clone();
+  let mut version = motion_last.version;
   let max = version.len();
   version[max - 1] += 1;
+  let name = version_to_string(&version, &cookie.version) + &cookie.separator + &name;
 
   let mut path = PathBuf::from(&directory);
-  path.push(version_to_string(&version, &cookie.version) + &cookie.separator + &name + ".add" + &cookie.extension);
+  path.push(String::new() + &name + ".add" + &cookie.extension);
   println!("Writting: {:?} to the file system", path);
-  {
-    let mut f = File::create(path.as_path()).unwrap();
-    f.write_all(cookie.add.as_bytes()).unwrap();
+  if let Ok(mut f) = File::create(path.as_path()) {
+    if let Err(e) = f.write_all(cookie.add.as_bytes()) {
+      panic!("Could not write {:?} to the file system due to:\n{}", path, e);
+    }
   }
   path.pop();
-  path.push(version_to_string(&version, &cookie.version) + &cookie.separator + &name + ".sub" + &cookie.extension);
+  path.push(String::new() + &name + ".add" + &cookie.extension);
   println!("Writting: {:?} to the file system", path);
-  {
-    let mut f = File::create(path.as_path()).unwrap();
-    f.write_all(cookie.sub.as_bytes()).unwrap();
+  if let Ok(mut f) = File::create(path.as_path()) {
+    if let Err(e) = f.write_all(cookie.sub.as_bytes()) {
+      panic!("Could not write {:?} to the file system due to:\n{}", path, e);
+    }
   }
 }
 
