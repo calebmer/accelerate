@@ -1,24 +1,44 @@
+//! Motions module helper for getting the template information in the file
+//! system‘s motions directory.
 extern crate regex;
 use self::regex::Regex;
 use std::fs;
 
+/// Simple enum defining the add and sub operations.
 pub enum Op {
   Add,
   Sub,
 }
 
+/// The template type which contains a number of useful information when
+/// discovering and creating motions.
 pub struct Template {
+  /// The name of the add template file.
   pub add_name: String,
+  /// The name of the sub template file.
   pub sub_name: String,
+  /// An array defining the structure of the template‘s semantic version. If a
+  /// template defines a version of `xxx` the resulting vector will be roughly
+  /// `[3]`. But if a template defines a version of `x.x.xx` the resulting
+  /// vector will be roughly `[1,1,2]`.
   pub version: Vec<usize>,
+  /// The string between the version and the template name.
   pub separator: String,
+  /// The optional extension of the template.
   pub extension: String,
+  /// The contents of the add template file.
   pub add: String,
+  /// The contents of the sub template file.
   pub sub: String,
+  /// A constructed regular expression which will match all motions which the
+  /// template matches.
   pub regex: Regex,
 }
 
 impl Template {
+  /// Gets the template for a motions directory. Searches all the file names
+  /// for a pair of files matching the accelerator template format and turns
+  /// those into a usable type by the motions module.
   pub fn get(directory: &String, names: &Vec<String>) -> Self {
     let template_add = Regex::new(r"^([x.]+)([-_ ~]+)template\.add(.*)$").unwrap();
     let template_sub = Regex::new(r"^([x.]+)([-_ ~]+)template\.sub(.*)$").unwrap();
@@ -51,6 +71,9 @@ impl Template {
     }
   }
 
+  /// Get’s the operation (add or sub) from a motion‘s name string. For
+  /// example, a motion that matches the template and looks like
+  /// `001-hello-world.add` would return as an “add” operation.
   pub fn get_op(&self, name: &String) -> Op {
     if !self.regex.is_match(name) {
       panic!("Name must conform with the template string")
@@ -65,6 +88,9 @@ impl Template {
     }
   }
 
+  /// Get‘s the name of a motion without the version number, seperator,
+  /// operation, or extension. For example, a motion that matches the template
+  /// and looks like `001-hello-world.add` would return `hello-world`.
   pub fn get_name(&self, name: &String) -> String {
     if !self.regex.is_match(name) {
       panic!("Name must conform with the template string");
