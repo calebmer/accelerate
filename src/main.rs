@@ -43,9 +43,8 @@ fn main() {
                   .get_matches();
   // Get all the specified variables or set them to their default values
   let target = matches.value_of("url").unwrap();
-  let directory = matches.value_of("path").unwrap_or(".");
-  // TODO change for proper get
-  let mots = motions::get();
+  let directory = matches.value_of("path").unwrap_or(".").to_string();
+  let mots = motions::discover(&directory);
   // TODO Adquire driver properly!
   let mut driver = get_driver(target);
   // Go through and find what matched
@@ -73,4 +72,4 @@ fn ls(dir: &String, mots: &Vec<Motion>) {
 }
 
 // TODO Implement
-fn create(directory: String, name: String) {}
+fn create(directory: String, name: String) { motions::discover(&directory); }
