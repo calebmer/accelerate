@@ -28,7 +28,7 @@ impl Motion {
       name: "test".to_string(),
       add: "add: ".to_string() + &n.to_string(),
       sub: "sub: ".to_string() + &n.to_string(),
-      version: vec![n,n+1,n+2],
+      version: vec![n, n + 1, n + 2],
       extension: String::from(""),
     }
   }
@@ -106,7 +106,7 @@ fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
   version_str
 }
 
-fn pad_number(num: usize, max: usize) -> String{
+fn pad_number(num: usize, max: usize) -> String {
   let mut s = num.to_string();
   while s.len() < max {
     s = 0.to_string() + &s;
