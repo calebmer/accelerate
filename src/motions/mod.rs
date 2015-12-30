@@ -23,6 +23,7 @@ impl Motion {
     }
   }
 
+  // XXX: Should be in a test file.
   pub fn test(n: usize) -> Self {
     Motion {
       name: "test".to_string(),
@@ -32,40 +33,6 @@ impl Motion {
       extension: String::from(""),
     }
   }
-}
-
-fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
-  let mut version = Vec::new();
-  for v in tmp.regex.replace_all(&name, "$1").split('.') {
-    version.push(v.parse().unwrap());
-  }
-  version
-}
-
-fn disambiguate(tmp: &template::Template, name: &String) -> String { tmp.regex.replace_all(&name, "$1,$2") }
-
-#[allow(unused_must_use)]
-fn read_file(dir: &String, name: &str) -> String {
-  let mut f = File::open(dir.clone() + r"\" + name).unwrap();
-  let mut s = String::new();
-  f.read_to_string(&mut s);
-  s
-}
-
-fn read_directory(directory: &String) -> Vec<String> {
-  let mut names = Vec::new();
-  if let Ok(entries) = fs::read_dir(directory.to_string()) {
-    for entry in entries {
-      if let Ok(file_name) = entry.unwrap().file_name().into_string() {
-        names.push(file_name);
-      } else {
-        panic!("File name did not contain valid Unicode data");
-      }
-    }
-  } else {
-    panic!("Directory: '{}' not found!", directory);
-  }
-  names
 }
 
 pub fn discover(directory: &String) -> Vec<Motion> {
@@ -96,24 +63,6 @@ pub fn discover(directory: &String) -> Vec<Motion> {
   motions
 }
 
-fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
-  let mut version_str = String::new();
-  for i in 0..mold.len() {
-    version_str.push_str(&pad_number(ver[i], mold[i]));
-    version_str.push('.');
-  }
-  version_str.pop();
-  version_str
-}
-
-fn pad_number(num: usize, max: usize) -> String {
-  let mut s = num.to_string();
-  while s.len() < max {
-    s = 0.to_string() + &s;
-  }
-  s
-}
-
 pub fn create(directory: String, name: String) {
   let cookie = template::Template::get(&directory, &read_directory(&directory));
   let motion_last = discover(&directory).pop().unwrap();
@@ -136,4 +85,58 @@ pub fn create(directory: String, name: String) {
     let mut f = File::create(path.as_path()).unwrap();
     f.write_all(cookie.sub.as_bytes()).unwrap();
   }
+}
+
+fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
+  let mut version = Vec::new();
+  for v in tmp.regex.replace_all(&name, "$1").split('.') {
+    version.push(v.parse().unwrap());
+  }
+  version
+}
+
+fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
+  let mut version_str = String::new();
+  for i in 0..mold.len() {
+    version_str.push_str(&pad_number(ver[i], mold[i]));
+    version_str.push('.');
+  }
+  version_str.pop();
+  version_str
+}
+
+fn disambiguate(tmp: &template::Template, name: &String) -> String {
+  tmp.regex.replace_all(&name, "$1,$2")
+}
+
+#[allow(unused_must_use)]
+fn read_file(dir: &String, name: &str) -> String {
+  let mut f = File::open(dir.clone() + r"\" + name).unwrap();
+  let mut s = String::new();
+  f.read_to_string(&mut s);
+  s
+}
+
+fn read_directory(directory: &String) -> Vec<String> {
+  let mut names = Vec::new();
+  if let Ok(entries) = fs::read_dir(directory.to_string()) {
+    for entry in entries {
+      if let Ok(file_name) = entry.unwrap().file_name().into_string() {
+        names.push(file_name);
+      } else {
+        panic!("File name did not contain valid Unicode data");
+      }
+    }
+  } else {
+    panic!("Directory: '{}' not found!", directory);
+  }
+  names
+}
+
+fn pad_number(num: usize, max: usize) -> String {
+  let mut s = num.to_string();
+  while s.len() < max {
+    s = 0.to_string() + &s;
+  }
+  s
 }
