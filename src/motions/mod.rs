@@ -97,6 +97,9 @@ fn version_to_string(ver: &Vec<usize>, mold: &Vec<usize>) -> String {
 
 fn pad_number(num: usize, max: usize) -> String {
   let mut s = num.to_string();
+  if s.len() > max {
+    panic!("we cannot have any more minor digits.");
+  }
   while s.len() < max {
     s = 0.to_string() + &s;
   }
