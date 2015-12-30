@@ -35,7 +35,6 @@ impl Motion {
   }
 
   /// A simple function to be used in tests to get a sample motion object.
-  // XXX: Should be in a test file.
   pub fn test(n: usize) -> Self {
     Motion {
       name: "test".to_string(),

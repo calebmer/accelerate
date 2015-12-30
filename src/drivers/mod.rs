@@ -14,7 +14,6 @@ pub trait Driver{
   fn execute(&self, motion: &String);
 }
 
-// XXX: Should either be in the tests folder, or in another file.
 pub struct DefaultDriver {
   target: String,
   status: isize,
