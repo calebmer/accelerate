@@ -1,6 +1,19 @@
-use drivers::{Driver, DefaultDriver};
+use drivers::Driver;
+use drivers::default::Driver as Test;
 use motions::Motion;
 use accelerator;
+
+impl Motion {
+  pub fn test(n: usize) -> Self {
+    Motion {
+      name: "test".to_string(),
+      add: "add: ".to_string() + &n.to_string(),
+      sub: "sub: ".to_string() + &n.to_string(),
+      version: vec![n, n + 1, n + 2],
+      extension: String::from(""),
+    }
+  }
+}
 
 fn get_motions() -> Vec<Motion> {
   return vec![Motion::test(0),
@@ -14,7 +27,7 @@ fn get_motions() -> Vec<Motion> {
               Motion::test(8)];
 }
 
-fn get_driver() -> Box<Driver> { Box::new(DefaultDriver::new("Test Driver".to_string())) }
+fn get_driver() -> Box<Driver> { Box::new(Test::new("Test Driver".to_string())) }
 
 #[test]
 fn up() {
