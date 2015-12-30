@@ -1,14 +1,10 @@
 //! Motions module helper for getting the template information in the file
 //! system‘s motions directory.
+use operation::Operation;
+use operation::Operation::*;
 extern crate regex;
 use self::regex::Regex;
 use std::fs;
-
-/// Simple enum defining the add and sub operations.
-pub enum Op {
-  Add,
-  Sub,
-}
 
 /// The template type which contains a number of useful information when
 /// discovering and creating motions.
@@ -74,7 +70,7 @@ impl Template {
   /// Get’s the operation (add or sub) from a motion‘s name string. For
   /// example, a motion that matches the template and looks like
   /// `001-hello-world.add` would return as an “add” operation.
-  pub fn get_op(&self, name: &String) -> Op {
+  pub fn get_op(&self, name: &String) -> Operation {
     if !self.regex.is_match(name) {
       panic!("Name must conform with the template string")
     }
@@ -82,8 +78,8 @@ impl Template {
     let op_string = self.regex.captures(name).unwrap().at(3).unwrap();
 
     match op_string {
-      "add" => Op::Add,
-      "sub" => Op::Sub,
+      "add" => Add,
+      "sub" => Sub,
       _ => unreachable!(),
     }
   }

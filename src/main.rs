@@ -1,6 +1,7 @@
 #![allow(dead_code, unused_variables, unused_imports)]
 pub mod accelerator;
 pub mod motions;
+pub mod operation;
 pub mod drivers;
 #[cfg(test)]
 mod tests;
@@ -66,7 +67,7 @@ fn main() {
   }
 }
 
-fn get_driver(target: String) -> Box<Driver> { Box::new(drivers::DefaultDriver::new(target)) }
+fn get_driver(target: String) -> Box<Driver> { Box::new(drivers::default::Driver::new(target)) }
 
 fn ls(dir: String, mots: Vec<Motion>) {
   println!("{} contains: {} motions\n", dir, mots.len());

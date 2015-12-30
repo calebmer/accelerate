@@ -1,6 +1,7 @@
 //! This module interacts with motions on the filesystem, turning them into a
 //! usable format for both the accelerator and the drivers.
 mod template;
+use operation::Operation::*;
 use std::fs;
 use std::path::*;
 use std::fs::File;
@@ -64,8 +65,8 @@ pub fn discover(directory: &String) -> Vec<Motion> {
 
   while let Some(n) = motion_names.pop() {
     match cookie.get_op(&n) {
-      template::Op::Add => motions_add.push(n),
-      template::Op::Sub => motions_sub.push(n),
+      Add => motions_add.push(n),
+      Sub => motions_sub.push(n),
     }
   }
 

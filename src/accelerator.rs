@@ -3,6 +3,8 @@
 //! series of motions (driver deltas) to get the final driver state.
 use drivers::Driver;
 use motions::Motion;
+use operation::Operation;
+use operation::Operation::*;
 
 /// Forces an integer to be inside a range. Similar to using both the algebraic
 /// `min` and `max` functions with the specified values.
@@ -33,24 +35,24 @@ fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mu
     finish = clamp(finish, 0, motions.len() as isize);
     let operation = Operation::get(finish, start);
     match operation {
-      Operation::Add(op) => {
+      Add => {
         let mut i = start;
         loop {
           if i == finish {
             break;
           }
           driver.execute(&motions[i as usize].add);
-          i += op;
+          i += Operation::add();
         }
         driver.set_status(i);
       }
-      Operation::Sub(op) => {
+      Sub => {
         let mut i = start;
         loop {
           if i == finish {
             break;
           }
-          i += op;
+          i += Operation::sub();
           driver.execute(&motions[i as usize].sub);
         }
         driver.set_status(i);
@@ -97,27 +99,4 @@ pub fn reset(driver: &mut Box<Driver>, motions: &Vec<Motion>) {
   let status = driver.get_status();
   execute(driver, motions, status, 0);
   execute(driver, motions, 0, status);
-}
-
-/// Defines the two possible directions of a motion. The integer parameter
-/// represents the algebraic direction (positive or negative).
-pub enum Operation {
-  /// Traditionally the up direction in other migration software. Adds some
-  /// things to the driver. Should be reversable with a sub operation.
-  Add(isize),
-  /// Traditionally the down direction in other migration software. Should remove any
-  /// changes made with the corresponding add operation.
-  Sub(isize),
-}
-
-impl Operation {
-  /// Takes two numbers and returns the operation required to get there. If
-  /// the first (finish) parameter is less we must be subtracting, if the
-  /// first parameter is greater we must be adding.
-  fn get(finish: isize, start: isize) -> Self {
-    if finish < start {
-      return Operation::Sub(-1);
-    }
-    Operation::Add(1)
-  }
 }
