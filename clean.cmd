@@ -1,5 +1,5 @@
 cargo clean
-rustfmt -v --write-mode=overwrite src/main.rs
+cargo fmt -- --write-mode=overwrite
 cargo build
 cargo test
 pause
