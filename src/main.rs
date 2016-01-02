@@ -23,7 +23,7 @@ fn main() {
                   .unified_help_message(true)
                   .author("Caleb Meredith <calebmeredith8@gmail.com>\nVictor M. Suarez <svmnotn@gmail.com>")
                   .about("Accelerate back and forth through time for your database or other in-place systems")
-                  .args_from_usage("--target=<url>     -t 'the targeted url to accelerate'
+                  .args_from_usage("<url>                 'the targeted url to accelerate'
                                     --directory=[path] -d 'the directory holding the motions (defaults to the current dir)'
                                     --yes              -y 'auto accept the changes, used for subcommands that remove information (USE WITH CAUTION!)'")
                   .subcommand(SubCommand::with_name("redo").about("subtracts then adds the last motion"))
@@ -51,8 +51,8 @@ fn main() {
                                 .arg_from_usage("<n> 'the motion to go to, 0 based'"))
                   .get_matches();
   // Get all the specified variables or set them to their default values
-  let target = matches.value_of("url").unwrap().to_string();
-  let directory = matches.value_of("path").unwrap_or(".").to_string();
+  let target = value_t_or_exit!(matches.value_of("url"), String);
+  let directory = value_t!(matches.value_of("path"), String).unwrap_or(".".to_string());
   let mots = motions::discover(&directory);
   // TODO Adquire driver properly!
   let mut driver = get_driver(target);
