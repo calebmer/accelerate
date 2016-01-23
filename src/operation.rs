@@ -19,9 +19,9 @@ impl Operation {
     Operation::Add
   }
 
-  ///The integer result represents the algebraic direction (positive).
+  /// The integer result represents the algebraic direction (positive).
   pub fn add() -> isize { 1 }
 
-  ///The integer result represents the algebraic direction (negative).
+  /// The integer result represents the algebraic direction (negative).
   pub fn sub() -> isize { -1 }
 }
