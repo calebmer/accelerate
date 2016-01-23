@@ -6,20 +6,19 @@ homepage = "https://github.com/ardite/accelerate"
 repository = "ardite/accelerate"
 readme = "README.md"
 license = "MIT"
-keywords = ["database",
-            "migrate",
-            "sql"]
-authors = ["Caleb Meredith <calebmeredith8@gmail.com>",
-           "Victor M. Suarez <svmnotn@gmail.com>"]
+keywords = ["database", "migrate", "sql"]
+authors = ["Caleb Meredith <calebmeredith8@gmail.com>", "Victor M. Suarez <svmnotn@gmail.com>"]
+
 [features]
-default         = ["driver-postgres"]
+default = ["driver-postgres"]
 driver-postgres = ["postgres"]
-# driver-mysql    = ["mysql"]                  Comming Soon(tm)
-# driver-mongodb  = ["mongodb"]                Comming Soon(tm)
-none            = []
+# driver-mysql = ["mysql"]
+# driver-mongodb = ["mongodb"]
+none = []
+
 [dependencies]
-clap     = "1.5"
-regex    = "0.1"
-postgres = {version = "0.10", optional = true }
-# mysql    = {version = "0.20", optional = true }
-# mongodb  = {version = "0.1", optional = true }
+clap = "1.5"
+regex = "0.1"
+postgres = { version = "0.10", optional = true }
+# mysql = { version = "0.20", optional = true }
+# mongodb  = { version = "0.1", optional = true }
