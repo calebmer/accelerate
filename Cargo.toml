@@ -1,0 +1,25 @@
+[package]
+name = "accelerate"
+version = "2.0.0"
+description = "Accelerate back and forth through time for your database or other in-place systems"
+homepage = "https://github.com/calebmer/accelerate"
+repository = "calebmer/accelerate"
+readme = "README.md"
+license = "MIT"
+keywords = ["database",
+            "migrate",
+            "sql"]
+authors = ["Caleb Meredith <calebmeredith8@gmail.com>",
+           "Victor M. Suarez <svmnotn@gmail.com>"]
+[features]
+default         = ["driver-postgres"]
+driver-postgres = ["postgres"]
+# driver-mysql    = ["mysql"]                  Comming Soon(tm)
+# driver-mongodb  = ["mongodb"]                Comming Soon(tm)
+none            = []
+[dependencies]
+clap     = "1.5"
+regex    = "0.1"
+postgres = {version = "0.10", optional = true }
+# mysql    = {version = "0.20", optional = true }
+# mongodb  = {version = "0.1", optional = true }
