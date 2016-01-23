@@ -1,3 +1,4 @@
+#![allow(unused_must_use)]
 use drivers::Driver;
 use drivers::default::Driver as Test;
 use motions::Motion;
@@ -27,7 +28,9 @@ fn get_motions() -> Vec<Motion> {
               Motion::test(8)];
 }
 
-fn get_driver() -> Box<Driver> { Box::new(Test::new("Test Driver".to_string())) }
+fn get_driver() -> Box<Driver> {
+  Box::new(Test::new("Test Driver".to_string()))
+}
 
 #[test]
 fn up() {

@@ -1,3 +1,3 @@
-#![cfg(feature = "driver-postgres")]
-use drivers::postgres::Driver;
+// #![cfg(feature = "driver-postgres")]
+// use drivers::postgres::Driver;
 // test postgres::Driver

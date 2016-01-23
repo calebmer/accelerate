@@ -1,5 +1,6 @@
 //! This module interacts with motions on the file system, turning them into a
 //! usable format for both the accelerator and the drivers.
+
 mod template;
 use operation::Operation::*;
 use std::fs;
@@ -7,6 +8,8 @@ use std::path::*;
 use std::fs::File;
 use std::io::prelude::*;
 use std::fmt;
+
+pub type MaybeError = super::MaybeError;
 
 /// The motion which will be applied to the driver. Can be either added or
 /// subbed.
@@ -129,7 +132,7 @@ fn pad_number(num: usize, max: usize) -> String {
 /// change is incremented by 1 and padded with 0s to match the correct length.
 /// If there might be more digits then allowed by the template, an error is
 /// thrown.
-pub fn create(directory: String, mut motions: Vec<Motion>, name: String) {
+pub fn create(directory: String, mut motions: Vec<Motion>, name: String) -> MaybeError {
   let cookie = template::Template::get(&read_directory(&directory));
   let motion_last = motions.pop().unwrap();
 
@@ -143,6 +146,7 @@ pub fn create(directory: String, mut motions: Vec<Motion>, name: String) {
   println!("Writting: {:?} to the file system", path);
   if let Ok(mut f) = File::create(path.as_path()) {
     if let Err(e) = f.write_all(cookie.add.as_bytes()) {
+      // TODO: Make this an `Err`.
       panic!("Could not write {:?} to the file system due to:\n{}", path, e);
     }
   }
@@ -151,9 +155,11 @@ pub fn create(directory: String, mut motions: Vec<Motion>, name: String) {
   println!("Writting: {:?} to the file system", path);
   if let Ok(mut f) = File::create(path.as_path()) {
     if let Err(e) = f.write_all(cookie.sub.as_bytes()) {
+      // TODO: Make this an `Err`
       panic!("Could not write {:?} to the file system due to:\n{}", path, e);
     }
   }
+  Ok(())
 }
 
 fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
@@ -164,7 +170,9 @@ fn version_from_string(tmp: &template::Template, name: &String) -> Vec<usize> {
   version
 }
 
-fn disambiguate(tmp: &template::Template, name: &String) -> String { tmp.regex.replace_all(&name, "$1,$2") }
+fn disambiguate(tmp: &template::Template, name: &String) -> String {
+  tmp.regex.replace_all(&name, "$1,$2")
+}
 
 #[allow(unused_must_use)]
 fn read_file(dir: &String, name: &str) -> String {
@@ -178,7 +186,7 @@ fn read_file(dir: &String, name: &str) -> String {
   }
 }
 
-trait Visible{
+trait Visible {
   fn str(&self) -> String;
 }
 

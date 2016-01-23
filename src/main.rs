@@ -9,11 +9,16 @@ mod tests;
 #[macro_use]
 extern crate clap;
 use clap::{App, SubCommand, ArgMatches};
-use std::io::*;
+use std::io::prelude::*;
+use std::io::stdin;
 use std::process;
 
 use drivers::Driver;
 use motions::Motion;
+
+// TODO: `Err` should not be a string and rather something which implements the
+// `std::error::Error` trait.
+pub type MaybeError = std::result::Result<(), String>;
 
 fn main() {
   // Create what is used to interpretate user input from the CLI
@@ -72,16 +77,22 @@ fn main() {
   let mut driver = get_driver(target);
 
   // Go through and find what matched
-  match matches.subcommand() {
+  let result = match matches.subcommand() {
     ("up", Some(_)) => accelerator::up(&mut driver, &mots),
     ("ls", Some(m)) => ls(directory, mots, m.is_present("long")),
     ("create", Some(m)) => motions::create(directory, mots, value_t_or_exit!(m.value_of("name"), String)),
     ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
     (cmd, m) => gate((cmd, m), driver, mots, matches.is_present("yes")),
+  };
+
+  // Handle any errors which occured.
+  if result.is_err() {
+    // TODO: Nice error message.
+    panic!(result.unwrap_err())
   }
 }
 
-fn gate(matches: (&str, Option<&ArgMatches>), mut driver: Box<Driver>, mots: Vec<Motion>, gate: bool) {
+fn gate(matches: (&str, Option<&ArgMatches>), mut driver: Box<Driver>, mots: Vec<Motion>, gate: bool) -> MaybeError {
   if !gate {
     println!("You might remove information by doing this action.\nDo you wish to continue? (Y/N)");
     let stdin = stdin();
@@ -110,13 +121,24 @@ fn gate(matches: (&str, Option<&ArgMatches>), mut driver: Box<Driver>, mots: Vec
     ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
     ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
     ("goto", Some(m)) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
-    _ => println!("Nothing to do!\nRe-run with --help for more information"),
+    _ => {
+      println!("Nothing to do!\nRe-run with --help for more information");
+      Ok(())
+    }
   }
 }
 
-fn get_driver(target: String) -> Box<Driver> { Box::new(drivers::default::Driver::new(target)) }
+fn get_driver(target: String) -> Box<Driver> {
+  let driver = drivers::default::Driver::new(target);
+  let error = driver.init_state();
 
-fn ls(dir: String, mots: Vec<Motion>, long: bool) {
+  match error {
+    Ok(_) => Box::new(driver),
+    Err(msg) => panic!(msg),
+  }
+}
+
+fn ls(dir: String, mots: Vec<Motion>, long: bool) -> MaybeError {
   println!("{} contains: {} motions\n", dir, mots.len());
   for mot in mots {
     if long {
@@ -125,4 +147,5 @@ fn ls(dir: String, mots: Vec<Motion>, long: bool) {
       println!("{}", mot.name);
     }
   }
+  Ok(())
 }
