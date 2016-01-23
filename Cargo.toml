@@ -2,8 +2,8 @@
 name = "accelerate"
 version = "2.0.0"
 description = "Accelerate back and forth through time for your database or other in-place systems"
-homepage = "https://github.com/calebmer/accelerate"
-repository = "calebmer/accelerate"
+homepage = "https://github.com/ardite/accelerate"
+repository = "ardite/accelerate"
 readme = "README.md"
 license = "MIT"
 keywords = ["database",
