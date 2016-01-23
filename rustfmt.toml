@@ -4,6 +4,6 @@ tab_spaces = 2
 normalise_comments = false
 format_strings = false
 fn_call_width = 100
-fn_single_line = true
+fn_single_line = false
 newline_style = "unix"
 write_mode = "overwrite"
