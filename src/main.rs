@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_variables, unused_imports)]
+#![allow(dead_code, unused_variables)]
 pub mod accelerator;
 pub mod motions;
 pub mod operation;
@@ -8,7 +8,7 @@ mod tests;
 
 #[macro_use]
 extern crate clap;
-use clap::{App, SubCommand, ArgMatches};
+use clap::{App, SubCommand, ArgMatches, AppSettings};
 use std::io::prelude::*;
 use std::io::stdin;
 use std::process;
@@ -23,11 +23,10 @@ pub type MaybeError = std::result::Result<(), String>;
 fn main() {
   // Create what is used to interpretate user input from the CLI
   let matches = App::new("accelerate")
-    .version(&crate_version!())
-    .global_version(true)
-    .unified_help_message(true)
-    .author("Caleb Meredith <calebmeredith8@gmail.com>\nVictor M. Suarez <svmnotn@gmail.com>")
+    .version(crate_version!())
+    .author("Caleb Meredith <calebmeredith8@gmail.com>\nVictor M. Suarez<svmnotn@gmail.com>")
     .about("Accelerate back and forth through time for your database or other in-place systems")
+    .settings(&[AppSettings::GlobalVersion, AppSettings::VersionlessSubcommands, AppSettings::UnifiedHelpMessage])
     .args_from_usage(
      "<url>                 'the targeted url to accelerate'
       --directory=[path] -d 'the directory holding the motions (defaults to the current dir)'
@@ -59,7 +58,8 @@ fn main() {
     .subcommand(
       SubCommand::with_name("shift")
       .about("goes to the nth motion relative to the current motion")
-      .arg_from_usage("--n=<n> 'the amount of motions to move relative to the current one, must be given as a number in the form of --n=[number]'")
+      .setting(AppSettings::AllowLeadingHyphen)
+      .arg_from_usage("<n> 'the amount of motions to move relative to the current one'")
     )
     .subcommand(
       SubCommand::with_name("goto")
@@ -70,7 +70,7 @@ fn main() {
 
   // Get all the specified variables or set them to their default values
   let target = value_t_or_exit!(matches.value_of("url"), String);
-  let directory = value_t!(matches.value_of("path"), String).unwrap_or(".".to_string());
+  let directory = value_t!(matches.value_of("directory"), String).unwrap_or(".".to_string());
   let mots = motions::discover(&directory);
 
   // TODO Adquire driver properly!

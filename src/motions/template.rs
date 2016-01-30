@@ -5,7 +5,6 @@ use operation::Operation::*;
 use super::DirFile;
 extern crate regex;
 use self::regex::Regex;
-use std::fs;
 
 /// The template type which contains a number of useful information when
 /// discovering and creating motions.

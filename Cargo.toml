@@ -17,7 +17,7 @@ driver-postgres = ["postgres"]
 none = []
 
 [dependencies]
-clap = "1.5"
+clap = "2.0"
 regex = "0.1"
 postgres = { version = "0.10", optional = true }
 # mysql = { version = "0.20", optional = true }
