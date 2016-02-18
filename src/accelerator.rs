@@ -7,8 +7,6 @@ use motions::Motion;
 use operation::Operation;
 use operation::Operation::*;
 
-pub type MaybeError = super::MaybeError;
-
 /// Forces an integer to be inside a range. Similar to using both the algebraic
 /// `min` and `max` functions with the specified values.
 fn clamp(n: isize, min: isize, max: isize) -> isize {
@@ -32,7 +30,7 @@ fn clamp(n: isize, min: isize, max: isize) -> isize {
 /// a larger number then finish we will execute all the "sub" motions until we
 /// reach finish, and if the start number is smaller we will execute all the
 /// "add" motions until we reach finish.
-fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mut finish: isize) -> MaybeError {
+fn execute<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>, mut start: isize, mut finish: isize) -> Result<(), D::E> {
   if start != finish {
     start = clamp(start, 0, motions.len() as isize);
     finish = clamp(finish, 0, motions.len() as isize);
@@ -42,15 +40,17 @@ fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mu
       if i == finish {
         break;
       }
+
       if operation == Operation::Sub {
         i += Operation::sub();
       }
-      let result = driver.execute(&motions[i as usize].add);
-      if result.is_err() {
-        // TODO: Capture this error and have the cause be the result error.
-        driver.set_status(i);
-        return result;
+
+      match driver.execute(&motions[i as usize].add) {
+        Ok(_) => (),
+        // Handle execution error by first trying to set the new status.
+        Err(err) => { try!(driver.set_status(i)); return Err(err) }
       }
+
       if operation == Operation::Add {
         i += Operation::add();
       }
@@ -62,38 +62,38 @@ fn execute(driver: &mut Box<Driver>, motions: &Vec<Motion>, mut start: isize, mu
 
 /// Starts at the current driver status and executes n motions in either the
 /// "add" or "sub" direction.
-pub fn shift(driver: &mut Box<Driver>, motions: &Vec<Motion>, n: isize) -> MaybeError {
-  let start = driver.get_status();
+pub fn shift<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>, n: isize) -> Result<(), D::E> {
+  let start = try!(driver.get_status());
   let finish = clamp(start + n, 0, motions.len() as isize);
   execute(driver, motions, start, finish)
 }
 
 /// Executes as many motions as necessary to move the driver from its current
 /// status to a certain state.
-pub fn goto(driver: &mut Box<Driver>, motions: &Vec<Motion>, finish: isize) -> MaybeError {
-  let status = driver.get_status();
+pub fn goto<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>, finish: isize) -> Result<(), D::E> {
+  let status = try!(driver.get_status());
   execute(driver, motions, status, finish)
 }
 
 /// "sub's" the last motion then "add's" it back.
-pub fn redo(driver: &mut Box<Driver>, motions: &Vec<Motion>) -> MaybeError {
+pub fn redo<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>) -> Result<(), D::E> {
   shift(driver, motions, -1).and_then(|_| shift(driver, motions, 1))
 }
 
 /// Applies all remaining "add" motions to the driver.
-pub fn up(driver: &mut Box<Driver>, motions: &Vec<Motion>) -> MaybeError {
+pub fn up<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>) -> Result<(), D::E> {
   let last = motions.len() as isize;
   goto(driver, motions, last)
 }
 
 /// Applies all remaining "sub" motions to the driver.
-pub fn down(driver: &mut Box<Driver>, motions: &Vec<Motion>) -> MaybeError {
+pub fn down<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>) -> Result<(), D::E> {
   goto(driver, motions, 0)
 }
 
 /// Applies all remaining "sub" motions to the driver before adding them all
 /// the subbed motions back.
-pub fn reset(driver: &mut Box<Driver>, motions: &Vec<Motion>) -> MaybeError {
-  let status = driver.get_status();
+pub fn reset<D: Driver>(driver: &mut Box<D>, motions: &Vec<Motion>) -> Result<(), D::E> {
+  let status = try!(driver.get_status());
   execute(driver, motions, status, 0).and_then(|_| execute(driver, motions, 0, status))
 }

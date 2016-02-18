@@ -51,7 +51,6 @@ impl Template {
     let extension = captures.at(3).unwrap();
 
     let mut version_regex = version.iter().map(|len| r"\d{".to_string() + &len.to_string() + "}").fold("".to_string(), |acc, re| (acc + &re + r"\."));
-    let len = version_regex.len();
     version_regex.pop();
     version_regex.pop();
     let regx_str = &(String::from("^(") + &version_regex + ")" + &regex::quote(separator) + r"(.+)\.(add|sub)" + &regex::quote(extension) + "$");

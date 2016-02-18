@@ -2,14 +2,14 @@
 //! usable format for both the accelerator and the drivers.
 
 mod template;
-use operation::Operation::*;
+
+use std::error::Error;
 use std::fs;
 use std::path::*;
 use std::fs::File;
 use std::io::prelude::*;
 use std::fmt;
-
-pub type MaybeError = super::MaybeError;
+use operation::Operation::*;
 
 /// The motion which will be applied to the driver. Can be either added or
 /// subbed.
@@ -132,7 +132,7 @@ fn pad_number(num: usize, max: usize) -> String {
 /// change is incremented by 1 and padded with 0s to match the correct length.
 /// If there might be more digits then allowed by the template, an error is
 /// thrown.
-pub fn create(directory: String, mut motions: Vec<Motion>, name: String) -> MaybeError {
+pub fn create<E: Error>(directory: String, mut motions: Vec<Motion>, name: String) -> Result<(), E> {
   let cookie = template::Template::get(&read_directory(&directory));
   let motion_last = motions.pop().unwrap();
 
