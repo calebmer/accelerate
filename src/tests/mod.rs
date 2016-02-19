@@ -1,2 +1,0 @@
-mod accelerator;
-mod drivers;

@@ -1,10 +1,7 @@
-pub mod accelerator;
+pub mod driver;
 pub mod motions;
 pub mod operation;
 pub mod drivers;
-
-#[cfg(test)]
-mod tests;
 
 #[macro_use]
 extern crate clap;
@@ -13,7 +10,7 @@ use clap::{App, SubCommand, ArgMatches, AppSettings};
 use std::io::prelude::*;
 use std::io::stdin;
 use std::process;
-use drivers::Driver;
+use driver::Driver;
 use motions::Motion;
 
 fn main() {
@@ -74,10 +71,10 @@ fn main() {
 
   // Go through and find what matched.
   let result = match matches.subcommand() {
-    ("up", Some(_)) => accelerator::up(&mut driver, &mots),
+    ("up", Some(_)) => driver.up(&mots),
     ("ls", Some(m)) => Ok(ls(directory, mots, m.is_present("long"))),
     ("create", Some(m)) => motions::create(directory, mots, value_t_or_exit!(m.value_of("name"), String)),
-    ("add", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
+    ("add", Some(m)) => driver.shift(&mots, value_t!(m.value_of("n"), isize).unwrap_or(1)),
     (cmd, m) => gate((cmd, m), driver, mots, matches.is_present("yes")),
   };
 
@@ -111,12 +108,12 @@ fn gate<D: Driver>(matches: (&str, Option<&ArgMatches>), mut driver: Box<D>, mot
     }
   }
   match matches {
-    ("down", _) => accelerator::down(&mut driver, &mots),
-    ("redo", _) => accelerator::redo(&mut driver, &mots),
-    ("reset", _) => accelerator::reset(&mut driver, &mots),
-    ("sub", Some(m)) => accelerator::shift(&mut driver, &mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
-    ("shift", Some(m)) => accelerator::shift(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
-    ("goto", Some(m)) => accelerator::goto(&mut driver, &mots, value_t_or_exit!(m.value_of("n"), isize)),
+    ("down", _) => driver.down(&mots),
+    ("redo", _) => driver.redo(&mots),
+    ("reset", _) => driver.reset(&mots),
+    ("sub", Some(m)) => driver.shift(&mots, value_t!(m.value_of("n"), isize).unwrap_or(1) * -1),
+    ("shift", Some(m)) => driver.shift(&mots, value_t_or_exit!(m.value_of("n"), isize)),
+    ("goto", Some(m)) => driver.goto(&mots, value_t_or_exit!(m.value_of("n"), isize)),
     _ => {
       println!("Nothing to do!\nRe-run with --help for more information");
       Ok(())

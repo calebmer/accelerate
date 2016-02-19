@@ -1,7 +1,7 @@
 use std::result;
 use std::error::Error;
 use std::fmt;
-use drivers::Driver;
+use driver::Driver;
 
 type Result<T> = result::Result<T, NoError>;
 
@@ -34,7 +34,7 @@ impl Driver for DefaultDriver {
     Ok(())
   }
 
-  fn execute(&self, motion: &String) -> Result<()> {
+  fn execute_motion(&self, motion: &String) -> Result<()> {
     println!("I am a {0}\n\t that says {1}\n\t while at {2}", self.target, motion, self.status);
     Ok(())
   }
