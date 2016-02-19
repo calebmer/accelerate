@@ -6,7 +6,7 @@ homepage = "https://github.com/ardite/accelerate"
 repository = "ardite/accelerate"
 readme = "README.md"
 license = "MIT"
-keywords = ["database", "migrate", "sql"]
+keywords = ["database", "migrate", "sql", "postgres", "postgresql"]
 authors = ["Caleb Meredith <calebmeredith8@gmail.com>", "Victor M. Suarez <svmnotn@gmail.com>"]
 
 [features]
