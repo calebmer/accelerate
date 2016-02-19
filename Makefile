@@ -6,7 +6,7 @@ bin/accelerate:
 	mv target/debug/accelerate $@
 
 bin/accelerate-%:
-	cargo build --features driver-$*
+	cargo build --features driver_$*
 	mkdir -p bin
 	mv target/debug/accelerate $@
 
