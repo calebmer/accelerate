@@ -69,7 +69,7 @@ fn main() {
   }
 }
 
-fn gate<D: Driver>(matches: (&str, Option<&ArgMatches>), mut driver: Box<D>, mots: Vec<Motion>, gate: bool) -> Result<(), D::E> {
+fn gate<D: Driver>(matches: (&str, Option<&ArgMatches>), mut driver: D, mots: Vec<Motion>, gate: bool) -> Result<(), D::E> {
   if !gate {
     println!("You might remove information by doing this action.\nDo you wish to continue? (Y/N)");
     let stdin = stdin();
@@ -105,8 +105,8 @@ fn gate<D: Driver>(matches: (&str, Option<&ArgMatches>), mut driver: Box<D>, mot
   }
 }
 
-fn get_driver(target: String) -> Box<drivers::default::DefaultDriver> {
-  Box::new(drivers::default::DefaultDriver::new(target))
+fn get_driver(target: String) -> drivers::default::DefaultDriver {
+  drivers::default::DefaultDriver::new(target)
 }
 
 fn ls(dir: String, mots: Vec<Motion>, long: bool) {
