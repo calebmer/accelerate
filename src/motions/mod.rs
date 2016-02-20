@@ -24,7 +24,7 @@ pub struct Motion {
   /// The add file to be executed by the driver.
   pub add: String,
   /// The sub file to be executed by the driver.
-  pub sub: String,
+  pub sub: String
 }
 
 impl Motion {
@@ -36,7 +36,7 @@ impl Motion {
       add: read_file(&dir, &add),
       sub: read_file(&dir, &sub),
       version: version_from_string(tmp, &add),
-      extension: tmp.extension.clone(),
+      extension: tmp.extension.clone()
     }
   }
 }
@@ -147,7 +147,9 @@ pub fn create<E: Error>(directory: String, mut motions: Vec<Motion>, name: Strin
   if let Ok(mut f) = File::create(path.as_path()) {
     if let Err(e) = f.write_all(cookie.add.as_bytes()) {
       // TODO: Make this an `Err`.
-      panic!("Could not write {:?} to the file system due to:\n{}", path, e);
+      panic!("Could not write {:?} to the file system due to:\n{}",
+             path,
+             e);
     }
   }
   path.pop();
@@ -156,7 +158,9 @@ pub fn create<E: Error>(directory: String, mut motions: Vec<Motion>, name: Strin
   if let Ok(mut f) = File::create(path.as_path()) {
     if let Err(e) = f.write_all(cookie.sub.as_bytes()) {
       // TODO: Make this an `Err`
-      panic!("Could not write {:?} to the file system due to:\n{}", path, e);
+      panic!("Could not write {:?} to the file system due to:\n{}",
+             path,
+             e);
     }
   }
   Ok(())
@@ -215,7 +219,7 @@ impl Visible for OsStr {
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
 pub struct DirFile {
   dir: String,
-  name: String,
+  name: String
 }
 
 fn read_directory(directory: &String) -> Vec<DirFile> {
@@ -231,7 +235,7 @@ fn read_directory(directory: &String) -> Vec<DirFile> {
             if let Some(file_name) = path.file_name() {
               names.push(DirFile {
                 dir: directory.clone(),
-                name: file_name.str(),
+                name: file_name.str()
               });
             } else {
               panic!("File name did not contain valid Unicode data");

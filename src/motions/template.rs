@@ -28,7 +28,7 @@ pub struct Template {
   pub sub: String,
   /// A constructed regular expression which will match all motions which the
   /// template matches.
-  pub regex: Regex,
+  pub regex: Regex
 }
 
 impl Template {
@@ -62,7 +62,7 @@ impl Template {
       version: captures.at(1).unwrap().split('.').map(|s| s.len()).collect(),
       separator: separator.to_string(),
       extension: extension.to_string(),
-      regex: Regex::new(regx_str).unwrap(),
+      regex: Regex::new(regx_str).unwrap()
     }
   }
 
@@ -79,7 +79,7 @@ impl Template {
     match op_string {
       "add" => Add,
       "sub" => Sub,
-      _ => unreachable!(),
+      _ => unreachable!()
     }
   }
 

@@ -1,3 +1,6 @@
+src:
+	cargo fmt
+
 bin: bin/accelerate bin/accelerate-postgres
 
 bin/accelerate:

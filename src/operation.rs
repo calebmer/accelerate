@@ -7,7 +7,7 @@ pub enum Operation {
 
   /// Traditionally the down direction in other migration software. Should remove any
   /// changes made with the corresponding add operation.
-  Sub,
+  Sub
 }
 
 impl Operation {

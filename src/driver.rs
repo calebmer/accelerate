@@ -60,7 +60,10 @@ pub trait Driver {
         match self.execute_motion(&motions[i as usize].add) {
           Ok(_) => (),
           // Handle execution error by first trying to set the new status.
-          Err(err) => { try!(self.set_status(i)); return Err(err) }
+          Err(err) => {
+            try!(self.set_status(i));
+            return Err(err);
+          }
         }
 
         if operation == Operation::Add {
@@ -135,13 +138,17 @@ mod tests {
   use motions::Motion;
 
   fn get_motions() -> Vec<Motion> {
-    (0..8).map(|n| Motion {
-      name: "test".to_string(),
-      add: "add: ".to_string() + &n.to_string(),
-      sub: "sub: ".to_string() + &n.to_string(),
-      version: vec![n, n + 1, n + 2],
-      extension: String::from("")
-    }).collect()
+    (0..8)
+    .map(|n| {
+      Motion {
+        name: "test".to_string(),
+        add: "add: ".to_string() + &n.to_string(),
+        sub: "sub: ".to_string() + &n.to_string(),
+        version: vec![n, n + 1, n + 2],
+        extension: String::from("")
+      }
+    })
+    .collect()
   }
 
   fn get_driver() -> DefaultDriver {
