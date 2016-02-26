@@ -3,6 +3,11 @@ rust:
   - stable
   - beta
   - nightly
+os:
+  - linux
+  - osx
 cache:
  directories:
   - $HOME/.cargo
+notifications:
+  email: false
