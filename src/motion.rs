@@ -19,24 +19,15 @@ struct Template {
   sub_path: PathBuf,
 }
 
-#[derive(Eq, PartialEq, Debug)]
-struct Motions {
-  template: Template,
-  motions: Vec<Motion>,
+fn find(dir: &Path) -> Result<Vec<Motion>, Error> {
+  let template = try!(find_template(dir));
+  let motions = try!(find_motions(&template, dir));
+  Ok(motions)
 }
 
-fn discover(dir: &Path) -> Result<Motions, Error> {
-  let paths = try!(find_paths(dir.to_path_buf()));
-  let template = try!(discover_template(&paths));
-  let motions = try!(discover_motions(&template, &paths));
+fn find_template(dir: &Path) -> Result<Template, Error> {
+  let paths = try!(find_paths(dir.to_path_buf(), 1));
 
-  Ok(Motions {
-    template: template,
-    motions: motions,
-  })
-}
-
-fn discover_template(paths: &Vec<PathBuf>) -> Result<Template, Error> {
   // Create the regexi which will match our template file names.
   let add_re = Regex::new(r"^template\.add($|\..+$)").unwrap();
   let sub_re = Regex::new(r"^template\.sub($|\..+$)").unwrap();
@@ -74,12 +65,14 @@ fn discover_template(paths: &Vec<PathBuf>) -> Result<Template, Error> {
   })
 }
 
-fn discover_motions(template: &Template, paths: &Vec<PathBuf>) -> Result<Vec<Motion>, Error> {
+fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
   // Get all the file names for our paths for later use. We also make sure we
   // return a tuple. This way we can keep the original path.
+  let paths = try!(find_paths(dir.to_path_buf(), 100));
   let paths: Vec<(&PathBuf, &str)> = {
-    paths.into_iter()
-    .filter_map(|sub_path| sub_path.file_name().and_then(OsStr::to_str).map(|file_name| (sub_path, file_name)))
+    paths
+    .iter()
+    .filter_map(|path| path.file_name().and_then(OsStr::to_str).map(|file_name| (path, file_name)))
     .collect()
   };
 
@@ -90,15 +83,16 @@ fn discover_motions(template: &Template, paths: &Vec<PathBuf>) -> Result<Vec<Mot
   let mut motions: Vec<Motion> = Vec::new();
 
   // Iterate through all of our paths…
-  for &(add_path, add_file_name) in paths.iter() {
+  for &(ref add_path, add_file_name) in paths.iter() {
     // If this path is an add file continue…
     if add_re.is_match(add_file_name) {
       // Get the name and timestamp for this motion.
       let name = add_re.replace_all(add_file_name, "$1");
       // Get the sub path with a name that matches our add path. If it does not
       // exist, throw an error.
-      let &(sub_path, _) = try!(
-        paths.iter()
+      let &(ref sub_path, _) = try!(
+        paths
+        .iter()
         .find(|&&(_, sub_file_name)| sub_re.is_match(sub_file_name) && sub_re.replace_all(sub_file_name, "$1") == name)
         .ok_or(Error::new(format!("Sub file not found for add file '{}'.", add_file_name)))
       );
@@ -117,17 +111,21 @@ fn discover_motions(template: &Template, paths: &Vec<PathBuf>) -> Result<Vec<Mot
   Ok(motions)
 }
 
-fn find_paths(path: PathBuf) -> io::Result<Vec<PathBuf>> {
+fn find_paths(path: PathBuf, recurse: u8) -> io::Result<Vec<PathBuf>> {
   // If the path is a directory let’s recursively go through every entry and
   // rerun our `discover_all` function.
   if try!(fs::metadata(&path)).is_dir() {
+    // If we have ended our recursion, just return an empty vec.
+    if recurse == 0 {
+      return Ok(vec![])
+    }
     // Create a new paths vec.
     let mut paths: Vec<PathBuf> = Vec::new();
     // Loop through the directory…
     for entry in try!(fs::read_dir(&path)) {
       // Get all the paths from this entry path by recursively calling the
       // function.
-      let mut next_paths = try!(find_paths(try!(entry).path()));
+      let mut next_paths = try!(find_paths(try!(entry).path(), recurse - 1));
       // Append these next paths to our top level motions vec.
       paths.append(&mut next_paths);
     }
@@ -144,7 +142,7 @@ fn find_paths(path: PathBuf) -> io::Result<Vec<PathBuf>> {
 #[cfg(test)]
 mod tests {
   use std::path::{Path, PathBuf};
-  use super::{find_paths, discover, Motions, Template, Motion};
+  use super::{find_paths, find, Motion, find_template, Template};
 
   fn pb(path: &str) -> PathBuf {
     Path::new(path).to_path_buf()
@@ -152,7 +150,7 @@ mod tests {
 
   #[test]
   fn test_find_paths() {
-    assert_eq!(find_paths(pb("tests/fixtures/nested")).unwrap(), vec![
+    assert_eq!(find_paths(pb("tests/fixtures/nested"), 100).unwrap(), vec![
       pb("tests/fixtures/nested/234567-bar.add"),
       pb("tests/fixtures/nested/234567-bar.sub"),
       pb("tests/fixtures/nested/a/345678-baz.add"),
@@ -167,83 +165,113 @@ mod tests {
   }
 
   #[test]
-  fn test_basic() {
-    assert_eq!(discover(Path::new("tests/fixtures/basic")).unwrap(), Motions {
-      template: Template {
-        extension: "".to_string(),
-        add_path: pb("tests/fixtures/basic/template.add"),
-        sub_path: pb("tests/fixtures/basic/template.sub"),
+  fn test_find_paths_limit_recurse_1() {
+    assert_eq!(find_paths(pb("tests/fixtures/nested"), 1).unwrap(), vec![
+      pb("tests/fixtures/nested/234567-bar.add"),
+      pb("tests/fixtures/nested/234567-bar.sub"),
+      pb("tests/fixtures/nested/template.add"),
+      pb("tests/fixtures/nested/template.sub"),
+    ]);
+  }
+
+  #[test]
+  fn test_find_paths_limit_recurse_2() {
+    assert_eq!(find_paths(pb("tests/fixtures/nested"), 2).unwrap(), vec![
+      pb("tests/fixtures/nested/234567-bar.add"),
+      pb("tests/fixtures/nested/234567-bar.sub"),
+      pb("tests/fixtures/nested/a/345678-baz.add"),
+      pb("tests/fixtures/nested/a/345678-baz.sub"),
+      pb("tests/fixtures/nested/b/123456-foo.add"),
+      pb("tests/fixtures/nested/b/123456-foo.sub"),
+      pb("tests/fixtures/nested/template.add"),
+      pb("tests/fixtures/nested/template.sub"),
+    ]);
+  }
+
+  #[test]
+  fn test_fixtures_basic() {
+    assert_eq!(find(Path::new("tests/fixtures/basic")).unwrap(), vec![
+      Motion {
+        add_path: pb("tests/fixtures/basic/123456-foo.add"),
+        sub_path: pb("tests/fixtures/basic/123456-foo.sub"),
       },
-      motions: vec![
-        Motion {
-          add_path: pb("tests/fixtures/basic/123456-foo.add"),
-          sub_path: pb("tests/fixtures/basic/123456-foo.sub"),
-        },
-        Motion {
-          add_path: pb("tests/fixtures/basic/234567-bar.add"),
-          sub_path: pb("tests/fixtures/basic/234567-bar.sub"),
-        },
-      ],
+      Motion {
+        add_path: pb("tests/fixtures/basic/234567-bar.add"),
+        sub_path: pb("tests/fixtures/basic/234567-bar.sub"),
+      },
+    ]);
+  }
+
+  #[test]
+  fn test_template_basic() {
+    assert_eq!(find_template(Path::new("tests/fixtures/basic")).unwrap(), Template {
+      extension: "".to_string(),
+      add_path: pb("tests/fixtures/basic/template.add"),
+      sub_path: pb("tests/fixtures/basic/template.sub"),
     });
   }
 
   #[test]
-  fn test_nested() {
-    assert_eq!(discover(Path::new("tests/fixtures/nested")).unwrap(), Motions {
-      template: Template {
-        extension: "".to_string(),
-        add_path: pb("tests/fixtures/nested/template.add"),
-        sub_path: pb("tests/fixtures/nested/template.sub"),
+  fn test_fixtures_nested() {
+    assert_eq!(find(Path::new("tests/fixtures/nested")).unwrap(), vec![
+      Motion {
+        add_path: pb("tests/fixtures/nested/b/123456-foo.add"),
+        sub_path: pb("tests/fixtures/nested/b/123456-foo.sub"),
       },
-      motions: vec![
-        Motion {
-          add_path: pb("tests/fixtures/nested/b/123456-foo.add"),
-          sub_path: pb("tests/fixtures/nested/b/123456-foo.sub"),
-        },
-        Motion {
-          add_path: pb("tests/fixtures/nested/234567-bar.add"),
-          sub_path: pb("tests/fixtures/nested/234567-bar.sub"),
-        },
-        Motion {
-          add_path: pb("tests/fixtures/nested/a/345678-baz.add"),
-          sub_path: pb("tests/fixtures/nested/a/345678-baz.sub"),
-        },
-        Motion {
-          add_path: pb("tests/fixtures/nested/b/c/456789-qux.add"),
-          sub_path: pb("tests/fixtures/nested/b/c/456789-qux.sub"),
-        },
-      ],
+      Motion {
+        add_path: pb("tests/fixtures/nested/234567-bar.add"),
+        sub_path: pb("tests/fixtures/nested/234567-bar.sub"),
+      },
+      Motion {
+        add_path: pb("tests/fixtures/nested/a/345678-baz.add"),
+        sub_path: pb("tests/fixtures/nested/a/345678-baz.sub"),
+      },
+      Motion {
+        add_path: pb("tests/fixtures/nested/b/c/456789-qux.add"),
+        sub_path: pb("tests/fixtures/nested/b/c/456789-qux.sub"),
+      },
+    ]);
+  }
+
+  #[test]
+  fn test_template_nested() {
+    assert_eq!(find_template(Path::new("tests/fixtures/nested")).unwrap(), Template {
+      extension: "".to_string(),
+      add_path: pb("tests/fixtures/nested/template.add"),
+      sub_path: pb("tests/fixtures/nested/template.sub"),
     });
   }
 
   #[test]
-  fn test_extension() {
-    assert_eq!(discover(Path::new("tests/fixtures/extension")).unwrap(), Motions {
-      template: Template {
-        extension: ".sql".to_string(),
-        add_path: pb("tests/fixtures/extension/template.add.sql"),
-        sub_path: pb("tests/fixtures/extension/template.sub.sql"),
+  fn test_fixtures_extension() {
+    assert_eq!(find(Path::new("tests/fixtures/extension")).unwrap(), vec![
+      Motion {
+        add_path: pb("tests/fixtures/extension/123456-foo.add.sql"),
+        sub_path: pb("tests/fixtures/extension/123456-foo.sub.sql"),
       },
-      motions: vec![
-        Motion {
-          add_path: pb("tests/fixtures/extension/123456-foo.add.sql"),
-          sub_path: pb("tests/fixtures/extension/123456-foo.sub.sql"),
-        },
-        Motion {
-          add_path: pb("tests/fixtures/extension/234567-bar.add.sql"),
-          sub_path: pb("tests/fixtures/extension/234567-bar.sub.sql"),
-        },
-      ],
+      Motion {
+        add_path: pb("tests/fixtures/extension/234567-bar.add.sql"),
+        sub_path: pb("tests/fixtures/extension/234567-bar.sub.sql"),
+      },
+    ]);
+  }
+
+  #[test]
+  fn test_template_extension() {
+    assert_eq!(find_template(Path::new("tests/fixtures/extension")).unwrap(), Template {
+      extension: ".sql".to_string(),
+      add_path: pb("tests/fixtures/extension/template.add.sql"),
+      sub_path: pb("tests/fixtures/extension/template.sub.sql"),
     });
   }
 
   #[test]
-  fn test_bad_templateless() {
-    assert!(discover(Path::new("tests/fixtures/bad/templateless")).is_err());
+  fn test_fixtures_bad_templateless() {
+    assert!(find(Path::new("tests/fixtures/bad/templateless")).is_err());
   }
 
   #[test]
   fn test_bad_names() {
-    assert!(discover(Path::new("tests/fixtures/bad/names")).is_err());
+    assert!(find(Path::new("tests/fixtures/bad/names")).is_err());
   }
 }
