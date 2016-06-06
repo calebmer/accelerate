@@ -1,0 +1,6 @@
+[package]
+name = "accelerate"
+version = "0.1.0"
+authors = ["calebmer <calebmeredith8@gmail.com>"]
+
+[dependencies]
