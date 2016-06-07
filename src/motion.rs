@@ -7,9 +7,10 @@ use regex::Regex;
 use error::Error;
 
 #[derive(Eq, PartialEq, Debug)]
-struct Motion {
-  add_path: PathBuf,
-  sub_path: PathBuf,
+pub struct Motion {
+  pub name: String,
+  pub add_path: PathBuf,
+  pub sub_path: PathBuf,
 }
 
 #[derive(Eq, PartialEq, Debug)]
@@ -94,10 +95,11 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
         paths
         .iter()
         .find(|&&(_, sub_file_name)| sub_re.is_match(sub_file_name) && sub_re.replace_all(sub_file_name, "$1") == name)
-        .ok_or(Error::new(format!("Sub file not found for add file '{}'.", add_file_name)))
+        .ok_or(Error::new(format!("Sub file not found for add file '{}'.", add_path.display())))
       );
       // Add the motion to our accumulator.
       motions.push(Motion {
+        name: name,
         add_path: add_path.to_path_buf(),
         sub_path: sub_path.to_path_buf(),
       });
@@ -105,7 +107,7 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
   }
 
   // Sort our motions by *file* name.
-  motions.sort_by(|a, b| a.add_path.file_name().cmp(&b.add_path.file_name()));
+  motions.sort_by(|a, b| a.name.cmp(&b.name));
 
   // Return all of our motions.
   Ok(motions)
@@ -192,10 +194,12 @@ mod tests {
   fn test_fixtures_basic() {
     assert_eq!(find(Path::new("tests/fixtures/basic")).unwrap(), vec![
       Motion {
+        name: "123456-foo".to_string(),
         add_path: pb("tests/fixtures/basic/123456-foo.add"),
         sub_path: pb("tests/fixtures/basic/123456-foo.sub"),
       },
       Motion {
+        name: "234567-bar".to_string(),
         add_path: pb("tests/fixtures/basic/234567-bar.add"),
         sub_path: pb("tests/fixtures/basic/234567-bar.sub"),
       },
@@ -215,18 +219,22 @@ mod tests {
   fn test_fixtures_nested() {
     assert_eq!(find(Path::new("tests/fixtures/nested")).unwrap(), vec![
       Motion {
+        name: "123456-foo".to_string(),
         add_path: pb("tests/fixtures/nested/b/123456-foo.add"),
         sub_path: pb("tests/fixtures/nested/b/123456-foo.sub"),
       },
       Motion {
+        name: "234567-bar".to_string(),
         add_path: pb("tests/fixtures/nested/234567-bar.add"),
         sub_path: pb("tests/fixtures/nested/234567-bar.sub"),
       },
       Motion {
+        name: "345678-baz".to_string(),
         add_path: pb("tests/fixtures/nested/a/345678-baz.add"),
         sub_path: pb("tests/fixtures/nested/a/345678-baz.sub"),
       },
       Motion {
+        name: "456789-qux".to_string(),
         add_path: pb("tests/fixtures/nested/b/c/456789-qux.add"),
         sub_path: pb("tests/fixtures/nested/b/c/456789-qux.sub"),
       },
@@ -246,10 +254,12 @@ mod tests {
   fn test_fixtures_extension() {
     assert_eq!(find(Path::new("tests/fixtures/extension")).unwrap(), vec![
       Motion {
+        name: "123456-foo".to_string(),
         add_path: pb("tests/fixtures/extension/123456-foo.add.sql"),
         sub_path: pb("tests/fixtures/extension/123456-foo.sub.sql"),
       },
       Motion {
+        name: "234567-bar".to_string(),
         add_path: pb("tests/fixtures/extension/234567-bar.add.sql"),
         sub_path: pb("tests/fixtures/extension/234567-bar.sub.sql"),
       },
