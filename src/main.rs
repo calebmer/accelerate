@@ -1,7 +1,7 @@
 extern crate regex;
 
 mod error;
-mod motion;
+mod motions;
 mod accelerator;
 
 fn main() {

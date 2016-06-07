@@ -1,5 +1,5 @@
 use error::Error;
-use motion::Motion;
+use motions::Motion;
 
 #[derive(Eq, PartialEq, Debug)]
 struct State {
@@ -78,7 +78,7 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
 #[cfg(test)]
 mod tests {
   use std::path::{Path, PathBuf};
-  use motion::Motion;
+  use motions::Motion;
   use super::{State, diff_motions};
 
   fn pb(path: &str) -> PathBuf {
