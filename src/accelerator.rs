@@ -1,10 +1,82 @@
+use std::io::prelude::*;
+use std::fs::File;
 use error::Error;
 use motions::Motion;
+use driver::Driver;
 
 #[derive(Eq, PartialEq, Debug)]
 struct State {
   applied: Vec<Motion>,
   unapplied: Vec<Motion>,
+}
+
+struct Accelerator<D: Driver> {
+  driver: D,
+  state: State,
+}
+
+impl<D: Driver> Accelerator<D> {
+  fn new(driver: D, motions: Vec<Motion>) -> Result<Self, Error> {
+    let records = try!(driver.get_records());
+    let state = try!(diff_motions(records, motions));
+    Ok(Accelerator {
+      driver: driver,
+      state: state,
+    })
+  }
+
+  fn add(&mut self, mut iterations: u8) -> Result<(), Error> {
+    loop {
+      // If we have finished our iterations break out.
+      if iterations == 0 { break; }
+      // Subtract one from our iterations.
+      iterations -= 1;
+      // Pop off the next motion to be applied.
+      if let Some(motion) = self.state.unapplied.pop() {
+        // Read the contents of our motion file.
+        let mut file = try!(File::open(&motion.add_path));
+        let mut transaction = String::new();
+        try!(file.read_to_string(&mut transaction));
+        // Execute the contents of our motion file.
+        try!(self.driver.execute(transaction));
+        // Add a record that we executed the motion.
+        try!(self.driver.add_record(&motion.name));
+        // Update our state to reflect that we’ve applied this motion.
+        self.state.applied.push(motion);
+      }
+      // If we have no more actions to apply, break out.
+      else {
+        break;
+      }
+    }
+    Ok(())
+  }
+
+  fn sub(&mut self, mut iterations: u8) -> Result<(), Error> {
+    loop {
+      // If we have finished our iterations break out.
+      if iterations == 0 { break; }
+      // Subtract one from our iterations.
+      iterations -= 1;
+      // Pop off the next motion to be applied.
+      if let Some(motion) = self.state.applied.pop() {
+        // Read the contents of our motion file.
+        let mut file = try!(File::open(&motion.sub_path));
+        let mut transaction = String::new();
+        try!(file.read_to_string(&mut transaction));
+        // Execute the contents of our motion file.
+        try!(self.driver.execute(transaction));
+        // Add a record that we executed the motion.
+        try!(self.driver.sub_record(&motion.name));
+        self.state.unapplied.push(motion);
+      }
+      // If we have no more actions to unapply, break out.
+      else {
+        break;
+      }
+    }
+    Ok(())
+  }
 }
 
 fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Result<State, Error> {
@@ -66,9 +138,8 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
     // If we have no more applied motions, return the rest of our expected
     // motions.
     else {
-      // Reverse the motions back before appending them so we get the original
-      // order.
-      motions.reverse();
+      // When we append the list, it will be reversed. We want this however
+      // because we will be able to pop the next motion to be applied.
       state.unapplied.append(&mut motions);
       return Ok(state);
     }
@@ -79,7 +150,8 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
 mod tests {
   use std::path::{Path, PathBuf};
   use motions::Motion;
-  use super::{State, diff_motions};
+  use driver::tests::TestDriver;
+  use super::{State, diff_motions, Accelerator};
 
   fn pb(path: &str) -> PathBuf {
     Path::new(path).to_path_buf()
@@ -106,6 +178,22 @@ mod tests {
       name: "c".to_string(),
       add_path: pb("c.add"),
       sub_path: pb("c.sub"),
+    }
+  }
+
+  fn motion_foo() -> Motion {
+    Motion {
+      name: "123456-foo".to_string(),
+      add_path: pb("tests/fixtures/basic/123456-foo.add"),
+      sub_path: pb("tests/fixtures/basic/123456-foo.sub"),
+    }
+  }
+
+  fn motion_bar() -> Motion {
+    Motion {
+      name: "234567-bar".to_string(),
+      add_path: pb("tests/fixtures/basic/234567-bar.add"),
+      sub_path: pb("tests/fixtures/basic/234567-bar.sub"),
     }
   }
 
@@ -144,7 +232,7 @@ mod tests {
       vec![motion_a(), motion_b(), motion_c()]
     ).unwrap(), State {
       applied: vec![motion_a()],
-      unapplied: vec![motion_b(), motion_c()],
+      unapplied: vec![motion_c(), motion_b()],
     });
   }
 
@@ -155,7 +243,133 @@ mod tests {
       vec![motion_a(), motion_b(), motion_c()]
     ).unwrap(), State {
       applied: vec![],
-      unapplied: vec![motion_a(), motion_b(), motion_c()],
+      unapplied: vec![motion_c(), motion_b(), motion_a()],
     });
+  }
+
+  #[test]
+  fn test_accelerator_add_1() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec![],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![],
+        unapplied: vec![motion_foo(), motion_bar()],
+      },
+    };
+
+    accelerator.add(1).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string()]);
+    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![motion_bar()]);
+    assert_eq!(accelerator.state.unapplied, vec![motion_foo()]);
+  }
+
+  #[test]
+  fn test_accelerator_add_2() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec![],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![],
+        unapplied: vec![motion_foo(), motion_bar()],
+      },
+    };
+
+    accelerator.add(2).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
+    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![motion_bar(), motion_foo()]);
+    assert_eq!(accelerator.state.unapplied, vec![]);
+  }
+
+  #[test]
+  fn test_accelerator_add_3() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec![],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![],
+        unapplied: vec![motion_foo(), motion_bar()],
+      },
+    };
+
+    accelerator.add(3).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
+    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![motion_bar(), motion_foo()]);
+    assert_eq!(accelerator.state.unapplied, vec![]);
+  }
+
+  #[test]
+  fn test_accelerator_sub_1() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![motion_bar(), motion_foo()],
+        unapplied: vec![],
+      },
+    };
+
+    accelerator.sub(1).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string()]);
+    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![motion_bar()]);
+    assert_eq!(accelerator.state.unapplied, vec![motion_foo()]);
+  }
+
+  #[test]
+  fn test_accelerator_sub_2() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![motion_bar(), motion_foo()],
+        unapplied: vec![],
+      },
+    };
+
+    accelerator.sub(2).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec![] as Vec<String>);
+    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![] as Vec<Motion>);
+    assert_eq!(accelerator.state.unapplied, vec![motion_foo(), motion_bar()]);
+  }
+
+  #[test]
+  fn test_accelerator_sub_3() {
+    let mut accelerator = Accelerator {
+      driver: TestDriver {
+        records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
+        executions: vec![],
+      },
+      state: State {
+        applied: vec![motion_bar(), motion_foo()],
+        unapplied: vec![],
+      },
+    };
+
+    accelerator.sub(3).unwrap();
+
+    assert_eq!(accelerator.driver.records, vec![] as Vec<String>);
+    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
+    assert_eq!(accelerator.state.applied, vec![] as Vec<Motion>);
+    assert_eq!(accelerator.state.unapplied, vec![motion_foo(), motion_bar()]);
   }
 }
