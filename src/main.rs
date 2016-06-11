@@ -1,6 +1,7 @@
 extern crate clap;
 extern crate regex;
 
+#[macro_use]
 mod error;
 mod motions;
 mod accelerator;

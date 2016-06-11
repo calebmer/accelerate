@@ -82,11 +82,11 @@ impl<D: Driver> Accelerator<D> {
 fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Result<State, Error> {
   // Make sure we never have more applied motions than we have expected motions.
   if !(motions.len() >= motion_names.len()) {
-    return Err(Error::new(format!(
+    return Err(error!(
       "There are {} motions that have been applied which is more than the {} motions we know of.",
       motion_names.len(),
       motions.len()
-    )));
+    ));
   }
 
   // Create our state variable.
@@ -120,13 +120,13 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
         // Otherwise, if the motions are different, something bad happened.
         // We should let the user know.
         else {
-          return Err(Error::new(format!(
+          return Err(error!(
             "The '{}' motion we expected is not the same as the '{}' motion that was actually applied at index {}. Try manually applying this motion with `accelerate apply {}`.",
             motion.name,
             motion_name,
             index,
             motion.add_path.display()
-          )));
+          ));
         }
       }
       // Because of our check earlier, there should always be more expected

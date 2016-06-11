@@ -38,13 +38,13 @@ fn find_template(dir: &Path) -> Result<Template, Error> {
   let add_path = try!(
     paths.iter()
     .find(|path| path.file_name().and_then(OsStr::to_str).map(|s| add_re.is_match(s)).unwrap_or(false))
-    .ok_or(Error::new("Add template file was not found."))
+    .ok_or(error!("Add template file was not found for directory '{}'.", dir.display()))
   );
 
   let sub_path = try!(
     paths.iter()
     .find(|path| path.file_name().and_then(OsStr::to_str).map(|s| sub_re.is_match(s)).unwrap_or(false))
-    .ok_or(Error::new("Sub template file was not found."))
+    .ok_or(error!("Sub template file was not found for directory '{}'.", dir.display()))
   );
 
   // Get both the add extension and the sub extension. We can safely unwrap the
@@ -55,7 +55,7 @@ fn find_template(dir: &Path) -> Result<Template, Error> {
 
   // If the extensions are not equal, there is an error.
   if add_ext != sub_ext {
-    return Err(Error::new(format!("Template extensions for add ('{}') and sub ('{}') do not match.", add_ext, sub_ext)))
+    return Err(error!("Template extensions for add ('{}') and sub ('{}') do not match.", add_ext, sub_ext))
   }
 
   // Return our template.
@@ -95,7 +95,7 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
         paths
         .iter()
         .find(|&&(_, sub_file_name)| sub_re.is_match(sub_file_name) && sub_re.replace_all(sub_file_name, "$1") == name)
-        .ok_or(Error::new(format!("Sub file not found for add file '{}'.", add_path.display())))
+        .ok_or(error!("Sub file not found for add file '{}'.", add_path.display()))
       );
       // Add the motion to our accumulator.
       motions.push(Motion {

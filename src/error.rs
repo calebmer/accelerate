@@ -1,19 +1,27 @@
+use std::error;
+use std::fmt;
 use std::io;
 
-#[derive(Debug)]
-pub enum Error {
-  IO(io::Error),
-  Other(String),
+pub type Error = Box<error::Error>;
+
+#[macro_export]
+macro_rules! error {
+  ($($item:expr),*) => {{
+    Box::new($crate::error::CustomError(format!($($item,)*))) as Error
+  }}
 }
 
-impl Error {
-  pub fn new<S: Into<String>>(message: S) -> Self {
-    Error::Other(message.into())
+#[derive(Debug)]
+pub struct CustomError(pub String);
+
+impl fmt::Display for CustomError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", self.0)
   }
 }
 
-impl From<io::Error> for Error {
-  fn from(error: io::Error) -> Self {
-    Error::IO(error)
+impl error::Error for CustomError {
+  fn description(&self) -> &str {
+    &self.0
   }
 }
