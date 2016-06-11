@@ -35,6 +35,6 @@ fn get_by_conn_str(conn_str: &str) -> Result<Box<Driver>, Error> {
     () if postgres::PostgresDriver::will_accept_connection(conn_str) =>
       Ok(Box::new(try!(postgres::PostgresDriver::connect(conn_str)))),
 
-    _ => Err(error!("No driver will accept connection string '{}'.", conn_str)),
+    _ => Err(error!("No driver will accept connection string '{}'. Try disabling driver inference by defining the driver type.", conn_str)),
   }
 }

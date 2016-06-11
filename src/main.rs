@@ -10,6 +10,7 @@ mod motions;
 mod accelerator;
 mod driver;
 
+use std::env;
 use std::path::Path;
 use ansi_term::Colour::*;
 use clap::{App, Arg, SubCommand};
@@ -27,20 +28,20 @@ fn main() {
 fn run() -> Result<(), Error> {
   let directory_arg = (
     Arg::with_name("directory")
-    .help("The directory in which accelerate will look for motions")
+    .help("The directory in which accelerate will look for motions, can also be set with ACCELERATE_DIRECTORY")
     .short("d")
     .long("directory")
     .value_name("PATH")
-    .default_value(".")
   );
 
   let driver_args = [
     Arg::with_name("conn_str")
-    .help("The connection string to use when connecting to your database")
-    .value_name("CONNECTION")
-    .required(true),
+    .help("The connection string to use when connecting to your database, can also be set with ACCELERATE_CONNECTION")
+    .short("c")
+    .long("connection")
+    .value_name("CONNECTION"),
     Arg::with_name("driver")
-    .help("The driver accelerate will use to execute your motions")
+    .help("The driver accelerate will use to execute your motions, can also be set with ACCELERATE_DRIVER")
     .short("r")
     .long("driver")
     .value_name("DRIVER")
@@ -135,8 +136,23 @@ fn run() -> Result<(), Error> {
 
   let subcommand_name = matches.subcommand_name().unwrap();
   let matches = matches.subcommand_matches(subcommand_name).unwrap();
-  let motions = || motions::find(&Path::new(matches.value_of("directory").unwrap()));
-  let driver = || driver::get(matches.value_of("driver"), matches.value_of("conn_str").unwrap());
+
+  let directory_env = env::var("ACCELERATE_DIRECTORY").ok();
+  let driver_env = env::var("ACCELERATE_DRIVER").ok();
+  let connection_env = env::var("ACCELERATE_CONNECTION").ok();
+
+  let motions = || {
+    let directory = matches.value_of("directory").or(directory_env.as_ref().map(|s| s.as_str())).unwrap_or(".");
+    motions::find(&Path::new(directory))
+  };
+
+  let driver = || {
+    let driver_type = matches.value_of("driver").or(driver_env.as_ref().map(|s| s.as_str()));
+    let conn_str = matches.value_of("conn_str").or(connection_env.as_ref().map(|s| s.as_str()));
+    let conn_str = try!(conn_str.ok_or(error!("A connection string is required and none was provided to either the command line or the environment variable `ACCELERATE_CONNECTION`.")) as Result<&str, Error>);
+    driver::get(driver_type, conn_str)
+  };
+
   let accelerator = || Accelerator::new(try!(driver()), try!(motions()));
 
   match subcommand_name {
