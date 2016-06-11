@@ -56,8 +56,8 @@ impl Driver for PostgresDriver {
     }
   }
 
-  fn execute(&mut self, transaction: String) -> Result<(), Error> {
-    try!(self.connection.execute(&transaction, &[]));
+  fn execute(&mut self, query: String) -> Result<(), Error> {
+    try!(self.connection.batch_execute(&query));
     Ok(())
   }
 }

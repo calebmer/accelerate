@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::io;
@@ -13,6 +14,16 @@ pub struct Motion {
   pub sub_path: PathBuf,
 }
 
+impl fmt::Display for Motion {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    try!(write!(f, "{}/", self.add_path.parent().unwrap().display()));
+    try!(write!(f, "{}", self.name));
+    let extension = self.add_path.extension().and_then(OsStr::to_str).unwrap_or("");
+    if extension != "add" { try!(write!(f, ".{}", extension)); }
+    Ok(())
+  }
+}
+
 #[derive(Eq, PartialEq, Debug)]
 struct Template {
   extension: String,
@@ -20,7 +31,7 @@ struct Template {
   sub_path: PathBuf,
 }
 
-fn find(dir: &Path) -> Result<Vec<Motion>, Error> {
+pub fn find(dir: &Path) -> Result<Vec<Motion>, Error> {
   let template = try!(find_template(dir));
   let motions = try!(find_motions(&template, dir));
   Ok(motions)

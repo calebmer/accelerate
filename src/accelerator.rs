@@ -1,5 +1,6 @@
 use std::io::prelude::*;
 use std::fs::File;
+use ansi_term::Colour::*;
 use error::Error;
 use motions::Motion;
 use driver::Driver;
@@ -10,13 +11,13 @@ struct State {
   unapplied: Vec<Motion>,
 }
 
-struct Accelerator<D: Driver> {
-  driver: D,
+pub struct Accelerator {
+  driver: Box<Driver>,
   state: State,
 }
 
-impl<D: Driver> Accelerator<D> {
-  fn new(driver: D, motions: Vec<Motion>) -> Result<Self, Error> {
+impl Accelerator {
+  pub fn new(driver: Box<Driver>, motions: Vec<Motion>) -> Result<Self, Error> {
     let records = try!(driver.get_records());
     let state = try!(diff_motions(records, motions));
     Ok(Accelerator {
@@ -25,7 +26,7 @@ impl<D: Driver> Accelerator<D> {
     })
   }
 
-  fn add(&mut self, mut iterations: u8) -> Result<(), Error> {
+  pub fn add(&mut self, mut iterations: usize) -> Result<(), Error> {
     loop {
       // If we have finished our iterations break out.
       if iterations == 0 { break; }
@@ -41,6 +42,8 @@ impl<D: Driver> Accelerator<D> {
         try!(self.driver.execute(transaction));
         // Add a record that we executed the motion.
         try!(self.driver.add_record(&motion.name));
+        // Print our success!
+        println!("{} {}", Green.bold().paint("Add"), motion);
         // Update our state to reflect that we’ve applied this motion.
         self.state.applied.push(motion);
       }
@@ -52,7 +55,7 @@ impl<D: Driver> Accelerator<D> {
     Ok(())
   }
 
-  fn sub(&mut self, mut iterations: u8) -> Result<(), Error> {
+  pub fn sub(&mut self, mut iterations: usize) -> Result<(), Error> {
     loop {
       // If we have finished our iterations break out.
       if iterations == 0 { break; }
@@ -68,6 +71,9 @@ impl<D: Driver> Accelerator<D> {
         try!(self.driver.execute(transaction));
         // Add a record that we executed the motion.
         try!(self.driver.sub_record(&motion.name));
+        // Print our success!
+        println!("{} {}", Red.bold().paint("Sub"), motion);
+        // Update our state blah blah blah.
         self.state.unapplied.push(motion);
       }
       // If we have no more actions to unapply, break out.
@@ -76,6 +82,10 @@ impl<D: Driver> Accelerator<D> {
       }
     }
     Ok(())
+  }
+
+  pub fn applied_count(&self) -> usize {
+    self.state.applied.len()
   }
 }
 

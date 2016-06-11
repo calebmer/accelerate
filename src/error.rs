@@ -1,6 +1,5 @@
 use std::error;
 use std::fmt;
-use std::io;
 
 pub type Error = Box<error::Error>;
 
