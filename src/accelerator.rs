@@ -160,7 +160,7 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
 mod tests {
   use std::path::{Path, PathBuf};
   use motions::Motion;
-  use driver::tests::TestDriver;
+  use driver::test::TestDriver;
   use super::{State, diff_motions, Accelerator};
 
   fn pb(path: &str) -> PathBuf {

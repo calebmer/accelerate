@@ -1,5 +1,5 @@
 #[cfg(test)]
-pub mod tests;
+pub mod test;
 #[cfg(feature = "driver-postgres")]
 pub mod postgres;
 
