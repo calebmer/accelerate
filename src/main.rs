@@ -35,16 +35,16 @@ fn run() -> Result<(), Error> {
   );
 
   let driver_args = [
-    Arg::with_name("conn_str")
-    .help("The connection string to use when connecting to your database, can also be set with ACCELERATE_CONNECTION")
-    .short("c")
-    .long("connection")
-    .value_name("CONNECTION"),
-    Arg::with_name("driver")
-    .help("The driver accelerate will use to execute your motions, can also be set with ACCELERATE_DRIVER")
+    Arg::with_name("database")
+    .help("The connection string to connecting to your database, can also be set with ACCELERATE_DATABASE")
+    .short("b")
+    .long("database")
+    .value_name("STRING"),
+    Arg::with_name("driver_name")
+    .help("The driver Accelerate will use to execute your motions, can also be set with ACCELERATE_DRIVER")
     .short("r")
     .long("driver")
-    .value_name("DRIVER")
+    .value_name("NAME")
     .possible_values(&["postgres"])
   ];
 
@@ -138,8 +138,8 @@ fn run() -> Result<(), Error> {
   let matches = matches.subcommand_matches(subcommand_name).unwrap();
 
   let directory_env = env::var("ACCELERATE_DIRECTORY").ok();
-  let driver_env = env::var("ACCELERATE_DRIVER").ok();
-  let connection_env = env::var("ACCELERATE_CONNECTION").ok();
+  let driver_name_env = env::var("ACCELERATE_DRIVER").ok();
+  let database_env = env::var("ACCELERATE_DATABASE").ok();
 
   let motions = || {
     let directory = matches.value_of("directory").or(directory_env.as_ref().map(|s| s.as_str())).unwrap_or(".");
@@ -147,10 +147,10 @@ fn run() -> Result<(), Error> {
   };
 
   let driver = || {
-    let driver_type = matches.value_of("driver").or(driver_env.as_ref().map(|s| s.as_str()));
-    let conn_str = matches.value_of("conn_str").or(connection_env.as_ref().map(|s| s.as_str()));
-    let conn_str = try!(conn_str.ok_or(error!("A connection string is required and none was provided to either the command line or the environment variable `ACCELERATE_CONNECTION`.")) as Result<&str, Error>);
-    driver::get(driver_type, conn_str)
+    let driver_name = matches.value_of("driver_name").or(driver_name_env.as_ref().map(|s| s.as_str()));
+    let database = matches.value_of("database").or(database_env.as_ref().map(|s| s.as_str()));
+    let database = try!(database.ok_or(error!("A database connection string is required and none was found in either the command line arguments or the environment variable `ACCELERATE_DATABASE`.")));
+    driver::get(driver_name, database)
   };
 
   let accelerator = || Accelerator::new(try!(driver()), try!(motions()));
