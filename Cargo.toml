@@ -1,7 +1,19 @@
 [package]
 name = "accelerate"
-version = "0.1.0"
-authors = ["calebmer <calebmeredith8@gmail.com>"]
+version = "2.0.0"
+description = "Accelerate your databases back and forth through easy to manage migration files."
+homepage = "https://github.com/calebmer/accelerate"
+repository = "calebmer/accelerate"
+readme = "README.md"
+license = "MIT"
+keywords = ["database", "migrate", "sql", "postgres"]
+authors = ["Caleb Meredith <calebmeredith8@gmail.com>"]
+
+[features]
+default = ["driver-postgres"]
+driver-postgres = ["postgres"]
 
 [dependencies]
+clap = { version = "2.5", features = ["suggestions"] }
 regex = "0.1"
+postgres = { version = "0.11", optional = true }
