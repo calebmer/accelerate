@@ -1,4 +1,4 @@
-#[cfg(test)]
+#[cfg(feature = "driver-test")]
 pub mod test;
 #[cfg(feature = "driver-postgres")]
 pub mod postgres;
@@ -22,6 +22,12 @@ pub fn get(driver_name: Option<&str>, conn_str: &str) -> Result<Box<Driver>, Err
 
 fn get_by_name(driver_name: &str, conn_str: &str) -> Result<Box<Driver>, Error> {
   match driver_name {
+    #[cfg(feature = "driver-test")]
+    "test" => Ok(Box::new(test::TestDriver {
+      records: if conn_str == "" { vec![] } else { conn_str.split(',').map(String::from).collect() },
+      executions: vec![],
+    })),
+
     #[cfg(feature = "driver-postgres")]
     "postgres" => Ok(Box::new(try!(postgres::PostgresDriver::connect(conn_str)))),
 

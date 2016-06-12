@@ -16,10 +16,10 @@ pub struct Motion {
 
 impl fmt::Display for Motion {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    try!(write!(f, "{}/", self.add_path.parent().unwrap().display()));
+    let parent_display = format!("{}", self.add_path.parent().unwrap().display());
+    try!(write!(f, "{}", parent_display));
+    if parent_display != "" { try!(write!(f, "/")); }
     try!(write!(f, "{}", self.name));
-    let extension = self.add_path.extension().and_then(OsStr::to_str).unwrap_or("");
-    if extension != "add" { try!(write!(f, ".{}", extension)); }
     Ok(())
   }
 }
@@ -294,5 +294,32 @@ mod tests {
   #[test]
   fn test_bad_names() {
     assert!(find(Path::new("tests/fixtures/bad/names")).is_err());
+  }
+
+  #[test]
+  fn test_motion_display_current_dir() {
+    assert_eq!(format!("{}", Motion {
+      name: "foo".to_string(),
+      add_path: pb("foo.add"),
+      sub_path: pb("foo.sub"),
+    }), "foo");
+  }
+
+  #[test]
+  fn test_motion_display_nested_dir() {
+    assert_eq!(format!("{}", Motion {
+      name: "foo".to_string(),
+      add_path: pb("hello/world/foo.add"),
+      sub_path: pb("hello/world/foo.sub"),
+    }), "hello/world/foo");
+  }
+
+  #[test]
+  fn test_motion_display_extension() {
+    assert_eq!(format!("{}", Motion {
+      name: "foo".to_string(),
+      add_path: pb("foo.add.txt"),
+      sub_path: pb("foo.sub.txt"),
+    }), "foo");
   }
 }

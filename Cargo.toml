@@ -9,12 +9,19 @@ license = "MIT"
 keywords = ["database", "migrate", "sql", "postgres"]
 authors = ["Caleb Meredith <calebmeredith8@gmail.com>"]
 
+[[bin]]
+name = "accelerate"
+
+[[test]]
+name = "tests"
+
 [features]
-default = ["driver-postgres"]
+default = ["driver-test", "driver-postgres"]
+driver-test = []
 driver-postgres = ["postgres"]
 
 [dependencies]
 ansi_term = "0.7"
 clap = { version = "2.5", features = ["suggestions"] }
-regex = "0.1"
 postgres = { version = "0.11", optional = true }
+regex = "0.1"

@@ -6,13 +6,13 @@ extern crate regex;
 
 #[macro_use]
 mod error;
+mod color;
 mod motions;
 mod accelerator;
 mod driver;
 
 use std::env;
 use std::path::Path;
-use ansi_term::Colour::*;
 use clap::{App, Arg, SubCommand};
 use clap::AppSettings::*;
 use error::Error;
@@ -22,7 +22,10 @@ use driver::Driver;
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-  run().unwrap();
+  match run() {
+    Ok(_) => (),
+    Err(error) => println!("{}: {}", color::red("Error"), error),
+  }
 }
 
 fn run() -> Result<(), Error> {
@@ -37,15 +40,16 @@ fn run() -> Result<(), Error> {
   let driver_args = [
     Arg::with_name("database")
     .help("The connection string to connecting to your database, can also be set with ACCELERATE_DATABASE")
-    .short("b")
+    .short("c")
     .long("database")
-    .value_name("STRING"),
+    .value_name("STRING")
+    .use_delimiter(false),
+
     Arg::with_name("driver_name")
     .help("The driver Accelerate will use to execute your motions, can also be set with ACCELERATE_DRIVER")
-    .short("r")
+    .short("t")
     .long("driver")
     .value_name("NAME")
-    .possible_values(&["postgres"])
   ];
 
   let matches = (
@@ -166,9 +170,9 @@ fn run() -> Result<(), Error> {
       let records = try!(driver.get_records());
       for motion in try!(motions()) {
         if records.contains(&motion.name) {
-          println!("{} {}", Green.bold().paint("✔"), motion);
+          println!("{} {}", color::green("✔"), motion);
         } else {
-          println!("{} {}", Red.bold().paint("𝙭"), motion);
+          println!("{} {}", color::red("𝙭"), motion);
         }
       }
     },

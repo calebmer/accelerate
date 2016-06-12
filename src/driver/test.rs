@@ -26,8 +26,9 @@ impl Driver for TestDriver {
     }
   }
 
-  fn execute(&mut self, transaction: String) -> Result<(), Error> {
-    self.executions.push(transaction);
+  fn execute(&mut self, query: String) -> Result<(), Error> {
+    println!("{}", &query);
+    self.executions.push(query);
     Ok(())
   }
 }
