@@ -9,7 +9,7 @@ pub trait Driver {
   fn get_records(&self) -> Result<Vec<String>, Error>;
   fn add_record(&mut self, record: &str) -> Result<(), Error>;
   fn sub_record(&mut self, record: &str) -> Result<(), Error>;
-  fn execute(&mut self, transaction: String) -> Result<(), Error>;
+  fn execute(&mut self, query: String) -> Result<(), Error>;
 }
 
 pub fn get(driver_name: Option<&str>, conn_str: &str) -> Result<Box<Driver>, Error> {

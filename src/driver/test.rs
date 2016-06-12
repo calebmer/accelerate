@@ -1,6 +1,7 @@
 use error::Error;
 use super::Driver;
 
+#[derive(Debug)]
 pub struct TestDriver {
   pub records: Vec<String>,
   pub executions: Vec<String>,
@@ -21,7 +22,7 @@ impl Driver for TestDriver {
       self.records.remove(index);
       Ok(())
     } else {
-      Err(Error::new(format!("Record '{}' could not be removed because it was never applied.", record)))
+      Err(error!("Record '{}' could not be removed because it was never applied.", record))
     }
   }
 

@@ -158,6 +158,7 @@ fn diff_motions(mut motion_names: Vec<String>, mut motions: Vec<Motion>) -> Resu
 
 #[cfg(test)]
 mod tests {
+  use std::mem;
   use std::path::{Path, PathBuf};
   use motions::Motion;
   use driver::test::TestDriver;
@@ -260,10 +261,10 @@ mod tests {
   #[test]
   fn test_accelerator_add_1() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec![],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![],
         unapplied: vec![motion_foo(), motion_bar()],
@@ -272,8 +273,10 @@ mod tests {
 
     accelerator.add(1).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string()]);
-    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec!["234567-bar".to_string()]);
+    assert_eq!(driver.executions, vec!["bar+\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![motion_bar()]);
     assert_eq!(accelerator.state.unapplied, vec![motion_foo()]);
   }
@@ -281,10 +284,10 @@ mod tests {
   #[test]
   fn test_accelerator_add_2() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec![],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![],
         unapplied: vec![motion_foo(), motion_bar()],
@@ -293,8 +296,10 @@ mod tests {
 
     accelerator.add(2).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
-    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
+    assert_eq!(driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![motion_bar(), motion_foo()]);
     assert_eq!(accelerator.state.unapplied, vec![]);
   }
@@ -302,10 +307,10 @@ mod tests {
   #[test]
   fn test_accelerator_add_3() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec![],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![],
         unapplied: vec![motion_foo(), motion_bar()],
@@ -314,8 +319,10 @@ mod tests {
 
     accelerator.add(3).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
-    assert_eq!(accelerator.driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec!["234567-bar".to_string(), "123456-foo".to_string()]);
+    assert_eq!(driver.executions, vec!["bar+\n".to_string(), "foo+\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![motion_bar(), motion_foo()]);
     assert_eq!(accelerator.state.unapplied, vec![]);
   }
@@ -323,10 +330,10 @@ mod tests {
   #[test]
   fn test_accelerator_sub_1() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![motion_bar(), motion_foo()],
         unapplied: vec![],
@@ -335,8 +342,10 @@ mod tests {
 
     accelerator.sub(1).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec!["234567-bar".to_string()]);
-    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec!["234567-bar".to_string()]);
+    assert_eq!(driver.executions, vec!["foo-\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![motion_bar()]);
     assert_eq!(accelerator.state.unapplied, vec![motion_foo()]);
   }
@@ -344,10 +353,10 @@ mod tests {
   #[test]
   fn test_accelerator_sub_2() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![motion_bar(), motion_foo()],
         unapplied: vec![],
@@ -356,8 +365,10 @@ mod tests {
 
     accelerator.sub(2).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec![] as Vec<String>);
-    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec![] as Vec<String>);
+    assert_eq!(driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![] as Vec<Motion>);
     assert_eq!(accelerator.state.unapplied, vec![motion_foo(), motion_bar()]);
   }
@@ -365,10 +376,10 @@ mod tests {
   #[test]
   fn test_accelerator_sub_3() {
     let mut accelerator = Accelerator {
-      driver: TestDriver {
+      driver: Box::new(TestDriver {
         records: vec!["234567-bar".to_string(), "123456-foo".to_string()],
         executions: vec![],
-      },
+      }),
       state: State {
         applied: vec![motion_bar(), motion_foo()],
         unapplied: vec![],
@@ -377,8 +388,10 @@ mod tests {
 
     accelerator.sub(3).unwrap();
 
-    assert_eq!(accelerator.driver.records, vec![] as Vec<String>);
-    assert_eq!(accelerator.driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
+    let driver: &Box<TestDriver> = unsafe { mem::transmute(&accelerator.driver) };
+
+    assert_eq!(driver.records, vec![] as Vec<String>);
+    assert_eq!(driver.executions, vec!["foo-\n".to_string(), "bar-\n".to_string()]);
     assert_eq!(accelerator.state.applied, vec![] as Vec<Motion>);
     assert_eq!(accelerator.state.unapplied, vec![motion_foo(), motion_bar()]);
   }
