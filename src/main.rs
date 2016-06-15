@@ -12,6 +12,9 @@ mod driver;
 
 use std::env;
 use std::path::Path;
+use std::process;
+use std::io;
+use std::io::prelude::*;
 use clap::{App, Arg, SubCommand};
 use clap::AppSettings::*;
 use colored::Colorize;
@@ -24,7 +27,7 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 fn main() {
   match run() {
     Ok(_) => (),
-    Err(error) => println!("{}: {}", "Error".red().bold(), error),
+    Err(error) => println!("{} {}", "Error:".red().bold(), error),
   }
 }
 
@@ -52,6 +55,13 @@ fn run() -> Result<(), Error> {
     .value_name("NAME")
   ];
 
+  let auto_confirm_arg = (
+    Arg::with_name("auto_confirm")
+    .help("Automatically confirm when removing information, this should only be used in automated environments")
+    .short("y")
+    .long("yes")
+  );
+
   let matches = (
     App::new("Accelerate")
     .bin_name("accelerate")
@@ -59,12 +69,12 @@ fn run() -> Result<(), Error> {
     .author("Caleb Meredith <calebmeredith8@gmail.com>")
     .about("Accelerate your databases back and forth through easy to manage migration files")
     .settings(&[
-      ArgRequiredElseHelp,
+      SubcommandRequired,
       GlobalVersion,
       VersionlessSubcommands,
       UnifiedHelpMessage,
-      SubcommandRequiredElseHelp,
-      AllowLeadingHyphen
+      ColoredHelp,
+      DeriveDisplayOrder,
     ])
     .subcommand(
       SubCommand::with_name("ls")
@@ -103,6 +113,7 @@ fn run() -> Result<(), Error> {
     .subcommand(
       SubCommand::with_name("sub")
       .about("Will sub `n` motions in the driver")
+      .arg(&auto_confirm_arg)
       .arg(&directory_arg)
       .args(&driver_args)
       .arg(
@@ -121,18 +132,21 @@ fn run() -> Result<(), Error> {
     .subcommand(
       SubCommand::with_name("down")
       .about("Will sub all motions that have been applied in the database")
+      .arg(&auto_confirm_arg)
       .arg(&directory_arg)
       .args(&driver_args)
     )
     .subcommand(
       SubCommand::with_name("redo")
       .about("Will sub and then add just the last motion")
+      .arg(&auto_confirm_arg)
       .arg(&directory_arg)
       .args(&driver_args)
     )
     .subcommand(
       SubCommand::with_name("reset")
       .about("Will sub all motions that have been applied in the database and then add all of the motions available")
+      .arg(&auto_confirm_arg)
       .arg(&directory_arg)
       .args(&driver_args)
     )
@@ -140,6 +154,7 @@ fn run() -> Result<(), Error> {
 
   let subcommand_name = matches.subcommand_name().unwrap();
   let matches = matches.subcommand_matches(subcommand_name).unwrap();
+  let auto_confirm = matches.is_present("auto_confirm");
 
   let directory_env = env::var("ACCELERATE_DIRECTORY").ok();
   let driver_name_env = env::var("ACCELERATE_DRIVER").ok();
@@ -183,6 +198,7 @@ fn run() -> Result<(), Error> {
       try!(accelerator.add(n));
     },
     "sub" => {
+      if !auto_confirm { try!(confirm()); }
       let mut accelerator = try!(accelerator());
       let n = try!(matches.value_of("n").unwrap_or("1").parse::<usize>());
       try!(accelerator.sub(n));
@@ -192,15 +208,18 @@ fn run() -> Result<(), Error> {
       try!(accelerator.add(usize::max_value()));
     },
     "down" => {
+      if !auto_confirm { try!(confirm()); }
       let mut accelerator = try!(accelerator());
       try!(accelerator.sub(usize::max_value()));
     },
     "redo" => {
+      if !auto_confirm { try!(confirm()); }
       let mut accelerator = try!(accelerator());
       try!(accelerator.sub(1));
       try!(accelerator.add(1));
     },
     "reset" => {
+      if !auto_confirm { try!(confirm()); }
       let mut accelerator = try!(accelerator());
       let applied = accelerator.applied_count();
       try!(accelerator.sub(usize::max_value()));
@@ -210,4 +229,19 @@ fn run() -> Result<(), Error> {
   }
 
   Ok(())
+}
+
+fn confirm() -> Result<(), Error> {
+  // Display a warning message.
+  println!("{} You may be removing information by proceeding. Do you wish to continue? (y/n)", "Warning:".yellow().bold());
+  // Read a line from `stdin`.
+  let mut line = String::new();
+  let stdin = io::stdin();
+  try!(stdin.lock().read_line(&mut line));
+  // If the line starts with “y” or “Y” continue, otherwise abort.
+  if line.starts_with("y") || line.starts_with("Y") {
+    Ok(())
+  } else {
+    process::exit(0);
+  }
 }

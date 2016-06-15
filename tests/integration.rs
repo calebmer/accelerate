@@ -105,27 +105,27 @@ fn test_add() {
 #[test]
 fn test_sub() {
   assert_output(
-    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar"]),
+    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "-y"]),
     "Sub basic/234567-bar\n",
     ""
   );
   assert_output(
-    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "2"]),
+    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "2", "-y"]),
     "Sub basic/234567-bar\nSub basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "2000"]),
+    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "2000", "-y"]),
     "Sub basic/234567-bar\nSub basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo"]),
+    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "123456-foo", "-y"]),
     "Sub basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["sub", "-d", "basic", "-t", "test", "-c", ""]),
+    command().args(&["sub", "-d", "basic", "-t", "test", "-c", "", "-y"]),
     "",
     ""
   );
@@ -153,17 +153,17 @@ fn test_up() {
 #[test]
 fn test_down() {
   assert_output(
-    command().args(&["down", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar"]),
+    command().args(&["down", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "-y"]),
     "Sub basic/234567-bar\nSub basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["down", "-d", "basic", "-t", "test", "-c", "123456-foo"]),
+    command().args(&["down", "-d", "basic", "-t", "test", "-c", "123456-foo", "-y"]),
     "Sub basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["down", "-d", "basic", "-t", "test", "-c", ""]),
+    command().args(&["down", "-d", "basic", "-t", "test", "-c", "", "-y"]),
     "",
     ""
   );
@@ -172,17 +172,17 @@ fn test_down() {
 #[test]
 fn test_redo() {
   assert_output(
-    command().args(&["redo", "-d", "basic", "-t", "test", "-c", ""]),
+    command().args(&["redo", "-d", "basic", "-t", "test", "-c", "", "-y"]),
     "Add basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["redo", "-d", "basic", "-t", "test", "-c", "123456-foo"]),
+    command().args(&["redo", "-d", "basic", "-t", "test", "-c", "123456-foo", "-y"]),
     "Sub basic/123456-foo\nAdd basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["redo", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar"]),
+    command().args(&["redo", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "-y"]),
     "Sub basic/234567-bar\nAdd basic/234567-bar\n",
     ""
   );
@@ -191,17 +191,17 @@ fn test_redo() {
 #[test]
 fn test_reset() {
   assert_output(
-    command().args(&["reset", "-d", "basic", "-t", "test", "-c", ""]),
+    command().args(&["reset", "-d", "basic", "-t", "test", "-c", "", "-y"]),
     "",
     ""
   );
   assert_output(
-    command().args(&["reset", "-d", "basic", "-t", "test", "-c", "123456-foo"]),
+    command().args(&["reset", "-d", "basic", "-t", "test", "-c", "123456-foo", "-y"]),
     "Sub basic/123456-foo\nAdd basic/123456-foo\n",
     ""
   );
   assert_output(
-    command().args(&["reset", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar"]),
+    command().args(&["reset", "-d", "basic", "-t", "test", "-c", "123456-foo,234567-bar", "-y"]),
     "Sub basic/234567-bar\nSub basic/123456-foo\nAdd basic/123456-foo\nAdd basic/234567-bar\n",
     ""
   );

@@ -21,7 +21,7 @@ driver-test = []
 driver-postgres = ["postgres"]
 
 [dependencies]
-clap = { version = "2.5", features = ["suggestions"] }
+clap = { version = "2.5", features = ["color", "suggestions"] }
 colored = "1.2"
 postgres = { version = "0.11", optional = true }
 regex = "0.1"
