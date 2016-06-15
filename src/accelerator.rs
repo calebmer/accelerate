@@ -1,6 +1,6 @@
 use std::io::prelude::*;
 use std::fs::File;
-use color;
+use colored::Colorize;
 use error::Error;
 use motions::Motion;
 use driver::Driver;
@@ -43,7 +43,7 @@ impl Accelerator {
         // Add a record that we executed the motion.
         try!(self.driver.add_record(&motion.name));
         // Print our success!
-        println!("{} {}", color::green("Add"), motion);
+        println!("{} {}", "Add".green().bold(), motion);
         // Update our state to reflect that we’ve applied this motion.
         self.state.applied.push(motion);
       }
@@ -72,7 +72,7 @@ impl Accelerator {
         // Add a record that we executed the motion.
         try!(self.driver.sub_record(&motion.name));
         // Print our success!
-        println!("{} {}", color::red("Sub"), motion);
+        println!("{} {}", "Sub".red().bold(), motion);
         // Update our state blah blah blah.
         self.state.unapplied.push(motion);
       }

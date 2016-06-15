@@ -2,8 +2,8 @@
 name = "accelerate"
 version = "2.0.0"
 dependencies = [
- "ansi_term 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "colored 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.11.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.1.71 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -55,6 +55,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "colored"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "lazy_static 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "hex"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -67,6 +75,11 @@ dependencies = [
  "winapi 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "lazy_static"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "libc"

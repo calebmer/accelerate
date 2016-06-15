@@ -4,7 +4,7 @@ use std::process::Command;
 
 pub fn command() -> Command {
   let mut command = Command::new(path_to_bin());
-  command.env_clear().current_dir("tests/fixtures");
+  command.env_clear().env("CLICOLOR", "0").current_dir("tests/fixtures");
   command
 }
 

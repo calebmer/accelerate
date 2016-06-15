@@ -1,12 +1,11 @@
 #![allow(unused_parens)]
 
-extern crate ansi_term;
 extern crate clap;
+extern crate colored;
 extern crate regex;
 
 #[macro_use]
 mod error;
-mod color;
 mod motions;
 mod accelerator;
 mod driver;
@@ -15,6 +14,7 @@ use std::env;
 use std::path::Path;
 use clap::{App, Arg, SubCommand};
 use clap::AppSettings::*;
+use colored::Colorize;
 use error::Error;
 use accelerator::Accelerator;
 use driver::Driver;
@@ -24,7 +24,7 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 fn main() {
   match run() {
     Ok(_) => (),
-    Err(error) => println!("{}: {}", color::red("Error"), error),
+    Err(error) => println!("{}: {}", "Error".red().bold(), error),
   }
 }
 
@@ -170,9 +170,9 @@ fn run() -> Result<(), Error> {
       let records = try!(driver.get_records());
       for motion in try!(motions()) {
         if records.contains(&motion.name) {
-          println!("{} {}", color::green("✔"), motion);
+          println!("{} {}", "✔".green().bold(), motion);
         } else {
-          println!("{} {}", color::red("𝙭"), motion);
+          println!("{} {}", "𝙭".red().bold(), motion);
         }
       }
     },
