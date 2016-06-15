@@ -1,8 +1,11 @@
+use std::time::{UNIX_EPOCH, SystemTime};
 use std::fmt;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::io;
+use std::io::prelude::*;
 use std::fs;
+use std::fs::File;
+use colored::Colorize;
 use regex;
 use regex::Regex;
 use error::Error;
@@ -126,7 +129,7 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
   Ok(motions)
 }
 
-fn find_paths(path: PathBuf, recurse: u8) -> io::Result<Vec<PathBuf>> {
+fn find_paths(path: PathBuf, recurse: u8) -> Result<Vec<PathBuf>, Error> {
   // If the path is a directory let’s recursively go through every entry and
   // rerun our `discover_all` function.
   if try!(fs::metadata(&path)).is_dir() {
@@ -152,6 +155,57 @@ fn find_paths(path: PathBuf, recurse: u8) -> io::Result<Vec<PathBuf>> {
   else {
     Ok(vec![path])
   }
+}
+
+// TODO: Tests.
+pub fn create(dir: &Path, name: &str) -> Result<(), Error> {
+  // Find the template for the directory we are creating a motion for.
+  let template = try!(find_template(dir));
+  // Add a timestamp to the name of the new motion.
+  let name = add_timestamp_to_name(name);
+  // Construct the add path and the sub path using our name and the template’s
+  // extension in addition to the directory the motions are in.
+  let mut add_path = PathBuf::new();
+  let mut sub_path = PathBuf::new();
+  add_path.push(&dir);
+  add_path.push(format!("{}.add{}", name, template.extension));
+  sub_path.push(&dir);
+  sub_path.push(format!("{}.sub{}", name, template.extension));
+  // Copy the add file and the sub file to their new locations and log some
+  // pretty things.
+  try!(copy_file(&template.add_path, &add_path));
+  println!("{} {}", "Create".green().bold(), add_path.display());
+  try!(copy_file(&template.sub_path, &sub_path));
+  println!("{} {}", "Create".green().bold(), sub_path.display());
+  Ok(())
+}
+
+fn add_timestamp_to_name(name: &str) -> String {
+  // Get all of the name’s segments (path segments).
+  let mut segments = name.split('/').map(String::from).collect::<Vec<String>>();
+  // Get the index of the last segment.
+  let last_i = segments.len() - 1;
+  // Get the timestamp in minutes.
+  let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs().checked_div(60).unwrap();
+  // Add the timestamp to the last segment.
+  segments[last_i] = format!("{}", timestamp) + "-" + &segments[last_i];
+  // Rejoin the segments with a slash and return the new name.
+  segments.join("/")
+}
+
+fn copy_file(in_path: &Path, out_path: &Path) -> Result<(), Error> {
+  // Open the file we will copy.
+  let mut in_file = try!(File::open(in_path));
+  // Read the contents of our in file to a string.
+  let mut contents = String::new();
+  try!(in_file.read_to_string(&mut contents));
+  // Create the directory for our out path.
+  if let Some(parent) = out_path.parent() { try!(fs::create_dir_all(parent)); }
+  // Create our out file.
+  let mut out_file = try!(File::create(out_path));
+  // Write all of the contents of our in file to the out file.
+  try!(out_file.write_all(contents.as_bytes()));
+  Ok(())
 }
 
 #[cfg(test)]

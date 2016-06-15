@@ -145,10 +145,8 @@ fn run() -> Result<(), Error> {
   let driver_name_env = env::var("ACCELERATE_DRIVER").ok();
   let database_env = env::var("ACCELERATE_DATABASE").ok();
 
-  let motions = || {
-    let directory = matches.value_of("directory").or(directory_env.as_ref().map(|s| s.as_str())).unwrap_or(".");
-    motions::find(&Path::new(directory))
-  };
+  let directory = || Path::new(matches.value_of("directory").or(directory_env.as_ref().map(|s| s.as_str())).unwrap_or("."));
+  let motions = || motions::find(&directory());
 
   let driver = || {
     let driver_name = matches.value_of("driver_name").or(driver_name_env.as_ref().map(|s| s.as_str()));
@@ -177,7 +175,7 @@ fn run() -> Result<(), Error> {
       }
     },
     "create" => {
-      unimplemented!();
+      try!(motions::create(&directory(), matches.value_of("name").unwrap()));
     },
     "add" => {
       let mut accelerator = try!(accelerator());
