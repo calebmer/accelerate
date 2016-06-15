@@ -89,8 +89,8 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
   };
 
   // Create the filename regexi for add and sub using the template extension.
-  let add_re = Regex::new(&(r"^(\d{6}-.+)\.add".to_owned() + &regex::quote(&template.extension) + "$")).unwrap();
-  let sub_re = Regex::new(&(r"^(\d{6}-.+)\.sub".to_owned() + &regex::quote(&template.extension) + "$")).unwrap();
+  let add_re = Regex::new(&(r"^(.+)\.add".to_owned() + &regex::quote(&template.extension) + "$")).unwrap();
+  let sub_re = Regex::new(&(r"^(.+)\.sub".to_owned() + &regex::quote(&template.extension) + "$")).unwrap();
   // Construct a motions accumulator.
   let mut motions: Vec<Motion> = Vec::new();
 
@@ -100,6 +100,8 @@ fn find_motions(template: &Template, dir: &Path) -> Result<Vec<Motion>, Error> {
     if add_re.is_match(add_file_name) {
       // Get the name and timestamp for this motion.
       let name = add_re.replace_all(add_file_name, "$1");
+      // Skip this file if it’s name is `add_file_name`.
+      if name == "template" { continue; }
       // Get the sub path with a name that matches our add path. If it does not
       // exist, throw an error.
       let &(ref sub_path, _) = try!(
