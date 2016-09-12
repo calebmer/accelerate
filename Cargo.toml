@@ -8,6 +8,7 @@ readme = "README.md"
 license = "MIT"
 keywords = ["database", "migrate", "sql", "postgres"]
 authors = ["Caleb Meredith <calebmeredith8@gmail.com>"]
+include = ["src/**/*.rs", "Cargo.toml", "README.md"]
 
 [[bin]]
 name = "accelerate"
